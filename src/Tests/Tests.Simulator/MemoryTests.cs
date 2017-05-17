@@ -3,6 +3,7 @@ using NUnit.Framework;
 
 namespace Tests.Simulator
 {
+    [TestFixture]
     public class MemoryTests
     {
         [Test]

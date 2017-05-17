@@ -96,5 +96,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Tbx32.Core\Tbx32.Core.csproj">
+      <Project>{03E3F546-A328-45E8-B302-6AF295D1071F}</Project>
+      <Name>Tbx32.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

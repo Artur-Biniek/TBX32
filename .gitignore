@@ -10,3 +10,5 @@
 /src/Tests/Tests.Simulator/bin/Debug
 /src/Tests/Tests.Simulator/obj
 /src/Simulator/obj/Debug
+/src/Tbx32.Core/obj/Debug
+/src/Tbx32.Core/bin/Debug

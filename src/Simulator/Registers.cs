@@ -1,4 +1,6 @@
-﻿namespace ArturBiniek.Tbx32.Simulator
+﻿using Tbx32.Core;
+
+namespace ArturBiniek.Tbx32.Simulator
 {
     public class Registers
     {
@@ -11,7 +13,7 @@
             _regs = new int[SIZE];
         }
 
-        public int this[byte index]
+        public int this[int index]
         {
             get
             {
@@ -21,6 +23,19 @@
             set
             {
                 _regs[index] = value;
+            }
+        }
+
+        public int this[Register reg]
+        {
+            get
+            {
+                return this[(int)reg];
+            }
+
+            set
+            {
+                this[(int)reg] = value;
             }
         }
     }
