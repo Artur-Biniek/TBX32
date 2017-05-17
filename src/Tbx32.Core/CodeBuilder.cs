@@ -56,22 +56,21 @@ namespace Tbx32.Core
             return new System.Collections.ObjectModel.ReadOnlyDictionary<uint, uint>(_code);
         }
 
-        public CodeBuilder Addi(Register result, Register source, short value)
+        private CodeBuilder push(uint instruction)
         {
-            _code[_index] = createOffsetType(OpCode.Addi, result, source, value);
-
-            _index++;
+            _code[_index++] = instruction;
 
             return this;
         }
 
+        public CodeBuilder Addi(Register result, Register source, short value)
+        {
+            return push(createOffsetType(OpCode.Addi, result, source, value));
+        }
+
         public CodeBuilder Subi(Register result, Register source, short value)
         {
-            _code[_index] = createOffsetType(OpCode.Subi, result, source, value);
-
-            _index++;
-
-            return this;
+            return push(createOffsetType(OpCode.Subi, result, source, value));
         }
     }
 }
