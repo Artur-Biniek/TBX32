@@ -3,8 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Simulator", "Simulator\Simulator.csproj", "{5138CDF8-0420-401C-B0EB-DBD7A8DDFB1B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{812531CB-3E32-4FC1-84FB-4A9D3D958A1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Simulator", "Tests\Tests.Simulator\Tests.Simulator.csproj", "{D6CD6C38-70EA-496B-A7A6-9B64561D745E}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5138CDF8-0420-401C-B0EB-DBD7A8DDFB1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5138CDF8-0420-401C-B0EB-DBD7A8DDFB1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5138CDF8-0420-401C-B0EB-DBD7A8DDFB1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5138CDF8-0420-401C-B0EB-DBD7A8DDFB1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6CD6C38-70EA-496B-A7A6-9B64561D745E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6CD6C38-70EA-496B-A7A6-9B64561D745E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6CD6C38-70EA-496B-A7A6-9B64561D745E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6CD6C38-70EA-496B-A7A6-9B64561D745E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D6CD6C38-70EA-496B-A7A6-9B64561D745E} = {812531CB-3E32-4FC1-84FB-4A9D3D958A1C}
 	EndGlobalSection
 EndGlobal

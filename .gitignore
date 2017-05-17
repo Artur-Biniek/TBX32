@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs
+/src/.vs/Emulator/v15
+/src/.vs/Emulator/v15/.suo
+/src/packages
+/src/Simulator/bin/Debug
