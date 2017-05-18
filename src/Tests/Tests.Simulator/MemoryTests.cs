@@ -13,7 +13,7 @@ namespace Tests.Simulator
 
             for (uint i = 0; i < 32; i++)
             {
-                var expected = i + 5;
+                var expected = (int)i + 5;
 
                 ram[i] = expected;
 
@@ -30,7 +30,7 @@ namespace Tests.Simulator
             {
                 var expected = i + 5;
 
-                ram[i] = expected;
+                ram[i] = (int)expected;
 
                 Assert.That(ram[i], Is.EqualTo(expected));
             }
@@ -52,7 +52,7 @@ namespace Tests.Simulator
             {
                 var expected = i + 5;
 
-                ram[i] = expected;
+                ram[i] = (int)expected;
                 ram[i]++;
 
                 Assert.That(ram[i], Is.EqualTo(expected + 1));
@@ -70,7 +70,7 @@ namespace Tests.Simulator
             {
                 var expected = i + 5;
 
-                ram[i] = expected;
+                ram[i] = (int)expected;
                 ram[i]++;
                 ram[i] = 0;
                 ram[i] += 34;

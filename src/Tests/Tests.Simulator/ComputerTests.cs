@@ -228,5 +228,75 @@ namespace Tests.Simulator
                 Assert.That(comp[Register.R30], Is.EqualTo(expected));
             }
         }
+
+        [Test]
+        public void DivImmediateInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R10, 13);
+            prg.Divi(Register.R11, Register.R10, 3);
+
+            comp.LoadProgram(prg.Build());
+            comp.Step();
+            comp.Step();
+
+            Assert.That(comp[Register.R11], Is.EqualTo(4));
+        }
+
+        [Test]
+        [TestCase(-98, 23)]
+        [TestCase(98, -23)]
+        [TestCase(12, 34)]
+        [TestCase(-68, -84)]
+        public void MulImmediateInstructionShouldWork(short a, short b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R10, a);
+            prg.Muli(Register.R11, Register.R10, b);
+
+            comp.LoadProgram(prg.Build());
+            comp.Step();
+            comp.Step();
+
+            Assert.That(comp[Register.R11], Is.EqualTo(a * b));
+        }
+
+        [Test]
+        [TestCase(-300, 500)]
+        [TestCase(1300, 14)]
+        [TestCase(int.MinValue, int.MaxValue)]
+        public void LdInstructionShouldWork(int val1, int val2)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var lbl1 = prg.CreateLabel();
+            var lbl2 = prg.CreateLabel();
+
+            prg.Ld(Register.R15, lbl1)
+               .Ld(Register.R16, lbl2)
+               .SetOrg(0xFFFE)
+               .MarkLabel(lbl1)
+               .Data(val1)
+               .MarkLabel(lbl2)
+               .Data(val2);
+           
+            comp.LoadProgram(prg.Build());
+
+            Assert.That(comp[0xFFFE], Is.EqualTo(val1));
+            Assert.That(comp[0xFFFF], Is.EqualTo(val2));
+
+            comp.Step();
+            Assert.That(comp[Register.R15], Is.EqualTo(val1));
+
+            comp.Step();
+            Assert.That(comp[Register.R16], Is.EqualTo(val2));
+        }
+
+
     }
 }

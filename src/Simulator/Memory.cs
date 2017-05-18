@@ -4,7 +4,7 @@ namespace ArturBiniek.Tbx32.Simulator
 {
     public class Memory
     {
-        Dictionary<uint, uint> _ram = new Dictionary<uint, uint>();
+        Dictionary<uint, int> _ram = new Dictionary<uint, int>();
 
         public int UsedCellsCount
         {
@@ -16,16 +16,16 @@ namespace ArturBiniek.Tbx32.Simulator
 
         public void Reset()
         {
-            _ram = new Dictionary<uint, uint>();
+            _ram = new Dictionary<uint, int>();
         }
 
-        public uint this[uint address]
+        public int this[uint address]
         {
             get
             {
                 if (!_ram.ContainsKey(address))
                 {
-                    _ram[address] = 0u;
+                    _ram[address] = 0;
                 }
 
                 return _ram[address];

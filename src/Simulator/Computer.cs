@@ -43,6 +43,14 @@ namespace ArturBiniek.Tbx32.Simulator
             }
         }
 
+        public int this[uint memoryLocation]
+        {
+            get
+            {
+                return _ram[memoryLocation];
+            }
+        }
+
         public Computer()
         {
             Reset();
@@ -59,13 +67,13 @@ namespace ArturBiniek.Tbx32.Simulator
         {
             foreach (var data in program)
             {
-                _ram[data.Key] = data.Value;
+                _ram[data.Key] = (int)data.Value;
             }
         }
 
         public void Step()
         {
-            _IR = _ram[_PC];
+            _IR = (uint)_ram[_PC];
             _PC++;
 
             var opcode = CodeBuilder.ExtractOpCode(_IR);
@@ -73,9 +81,14 @@ namespace ArturBiniek.Tbx32.Simulator
             var rb = CodeBuilder.ExtractRegB(_IR);
             var rc = CodeBuilder.ExtractRegC(_IR);
             var offset = CodeBuilder.ExtractOffset(_IR);
+            var address = CodeBuilder.ExtractAddress(_IR);
 
             switch (opcode)
             {
+                case OpCode.Ld:
+                    _regs[ra] = _ram[address];
+                    break;
+
                 case OpCode.Addi:
                     _regs[ra] = _regs[rb] + offset;
                     break;
@@ -94,6 +107,14 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 case OpCode.Shri:
                     _regs[ra] = (int)((uint)_regs[rb] >> offset);
+                    break;
+
+                case OpCode.Muli:
+                    _regs[ra] = _regs[rb] * offset;
+                    break;
+
+                case OpCode.Divi:
+                    _regs[ra] = _regs[rb] / offset;
                     break;
             }
         }
