@@ -38,7 +38,7 @@ namespace Tests.Simulator
         {
             var someadds = new CodeBuilder()
                     .Addi(R.T0, R.T1, -100)
-                    .Subi(R.Ra, R.Sp, 300)
+                    .Addi(R.Ra, R.Sp, 300)
                     .Build();
 
             Computer comp = new Computer();
@@ -59,7 +59,7 @@ namespace Tests.Simulator
             comp.Step();
 
             Assert.That(comp.PC, Is.EqualTo(2u));
-            Assert.That(CodeBuilder.ExtractOpCode(comp.IR), Is.EqualTo(OpCode.Subi));
+            Assert.That(CodeBuilder.ExtractOpCode(comp.IR), Is.EqualTo(OpCode.Addi));
             Assert.That(CodeBuilder.ExtractRegA(comp.IR), Is.EqualTo(R.Ra));
             Assert.That(CodeBuilder.ExtractRegB(comp.IR), Is.EqualTo(R.Sp));
             Assert.That(CodeBuilder.ExtractOffset(comp.IR), Is.EqualTo(300));
@@ -134,11 +134,11 @@ namespace Tests.Simulator
         }
 
         [Test]
-        public void SubImmediateInstructionShouldWork()
+        public void SubImmediateThroughAddImmediateInstructionShouldWork()
         {
             var prg = new CodeBuilder()
-                    .Subi(Register.R31, Register.R30, 10)
-                    .Subi(Register.R29, Register.R31, -20)
+                    .Addi(Register.R31, Register.R30, -10)
+                    .Addi(Register.R29, Register.R31, 20)
                     .Build();
 
             Computer comp = new Computer();

@@ -9,7 +9,6 @@
 
         // Offset format - OPCODE | RA | RB | OFFSET
         Addi, 
-        Subi,
         Movi,
         Shli,
         Shri,
