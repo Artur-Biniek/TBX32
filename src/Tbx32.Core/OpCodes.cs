@@ -5,5 +5,6 @@
         // Offset format - OPCODE | RA | RB | OFFSET
         Addi = 0xF, 
         Subi,
+        Movi,
     }
 }

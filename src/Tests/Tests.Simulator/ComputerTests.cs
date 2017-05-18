@@ -136,14 +136,14 @@ namespace Tests.Simulator
         [Test]
         public void SubImmediateInstructionShouldWork()
         {
-            var someadds = new CodeBuilder()
+            var prg = new CodeBuilder()
                     .Subi(Register.R31, Register.R30, 10)
                     .Subi(Register.R29, Register.R31, -20)
                     .Build();
 
             Computer comp = new Computer();
 
-            comp.LoadProgram(someadds);
+            comp.LoadProgram(prg);
 
             comp.Step();
             Assert.That(comp[Register.R31], Is.EqualTo(-10));
@@ -152,5 +152,25 @@ namespace Tests.Simulator
             Assert.That(comp[Register.R29], Is.EqualTo(10));
         }
 
+        [Test]
+        public void MovImmediateInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            for (int i = 0; i < 32; i++)
+            {
+                prg.Movi((Register)i, (short)((i + 1) * 2));
+            }
+
+            comp.LoadProgram(prg.Build());
+
+            for (int i = 0; i < 32; i++)
+            {
+                comp.Step();
+
+                Assert.That(comp[(Register)i], Is.EqualTo((i + 1) * 2));
+            }
+        }
     }
 }

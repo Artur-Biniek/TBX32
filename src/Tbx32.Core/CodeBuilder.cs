@@ -63,14 +63,19 @@ namespace Tbx32.Core
             return this;
         }
 
-        public CodeBuilder Addi(Register result, Register source, short value)
+        public CodeBuilder Addi(Register target, Register source, short value)
         {
-            return push(createOffsetType(OpCode.Addi, result, source, value));
+            return push(createOffsetType(OpCode.Addi, target, source, value));
         }
 
-        public CodeBuilder Subi(Register result, Register source, short value)
+        public CodeBuilder Subi(Register target, Register source, short value)
         {
-            return push(createOffsetType(OpCode.Subi, result, source, value));
+            return push(createOffsetType(OpCode.Subi, target, source, value));
+        }
+
+        public CodeBuilder Movi(Register target, short value)
+        {
+            return push(createOffsetType(OpCode.Movi, target, Register.R0, value));
         }
     }
 }
