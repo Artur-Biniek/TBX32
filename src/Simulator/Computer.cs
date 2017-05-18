@@ -91,6 +91,10 @@ namespace ArturBiniek.Tbx32.Simulator
                 case OpCode.Shli:
                     _regs[ra] = _regs[rb] << offset;
                     break;
+
+                case OpCode.Shri:
+                    _regs[ra] = (int)((uint)_regs[rb] >> offset);
+                    break;
             }
         }
     }

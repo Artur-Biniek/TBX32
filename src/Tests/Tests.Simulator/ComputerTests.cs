@@ -180,22 +180,52 @@ namespace Tests.Simulator
             var comp = new Computer();
             var expected = 1;
 
-            prg.Movi(0, (short)expected);
-            for (int i = 0; i < 16; i++)
+            prg.Movi(Register.R0, (short)expected);
+            for (int i = 0; i < 32; i++)
             {
-                prg.Shli((Register)(i + 1), (Register)0, (short)i);                              
+                prg.Shli(Register.R31, Register.R0, (short)i);
             }
 
             comp.LoadProgram(prg.Build());
 
             comp.Step();
-            for (int i = 0; i < 16; i++)
+            for (int i = 0; i < 32; i++)
             {
                 comp.Step();
 
                 expected = 1 << i;
 
-                Assert.That(comp[(Register)(i + 1)], Is.EqualTo(expected));
+                Assert.That(comp[Register.R31], Is.EqualTo(expected));
+            }
+        }
+
+        [Test]
+        public void ShrImmediateInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+            var start = 1 << 31;
+            var expected = 0;
+
+            prg.Movi(0, 1);
+            prg.Shli(Register.R0, Register.R0, 31);
+
+            for (int i = 0; i < 31; i++)
+            {
+                prg.Shri(Register.R30, Register.R0, (short)i);
+            }
+
+            comp.LoadProgram(prg.Build());
+
+            comp.Step();
+            comp.Step();
+            for (int i = 0; i < 31; i++)
+            {
+                comp.Step();
+
+                expected = (int)((uint)start >> i);
+
+                Assert.That(comp[Register.R30], Is.EqualTo(expected));
             }
         }
     }

@@ -82,5 +82,10 @@ namespace Tbx32.Core
         {
             return push(createOffsetType(OpCode.Shli, target, source, value));
         }
+
+        public CodeBuilder Shri(Register target, Register source, short value)
+        {
+            return push(createOffsetType(OpCode.Shri, target, source, value));
+        }
     }
 }
