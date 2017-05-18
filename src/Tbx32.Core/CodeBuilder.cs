@@ -27,13 +27,13 @@ namespace Tbx32.Core
 
         private uint createAddressType(OpCode opcode, Register reg, Label lbl)
         {
-            if (!_labels.ContainsKey(lbl))
+            if (lbl != null && !_labels.ContainsKey(lbl))
             {
                 throw new InvalidOperationException("Usage of unmarked lablel");
             }
 
             uint res = 0u;
-            uint address = _labels[lbl];
+            uint address = lbl == null ? 0u : _labels[lbl];
 
             res = (uint)opcode << 26
                 | (uint)reg << 21
@@ -182,6 +182,16 @@ namespace Tbx32.Core
         public CodeBuilder Jmp(Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.Jmp, (Register)0, target));
+        }
+
+        public CodeBuilder Jr(Register target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.Jr, target, null));
+        }
+
+        public CodeBuilder Jal(Register linkRegister, Label target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.Jal, linkRegister, target));
         }
     }
 }

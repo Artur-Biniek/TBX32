@@ -346,5 +346,81 @@ namespace Tests.Simulator
             Assert.That(comp[Register.R20], Is.EqualTo(21));
             Assert.That(comp[Register.R21], Is.EqualTo(22));
         }
+
+        [Test]
+        public void JrInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg.Movi(Register.R19, 0x100)
+               .Jr(Register.R19)
+               .Movi(Register.R20, 11)
+               .SetOrg(0x100)
+               .MarkLabel(target1)
+               .Movi(Register.R21, 21);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R20], Is.EqualTo(0));
+            Assert.That(comp[Register.R21], Is.EqualTo(21));
+        }
+
+        [Test]
+        public void JalInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg.Movi(Register.R19, 11)
+               .Jal(Register.R19, target1)
+               .Movi(Register.R20, 11)
+               .SetOrg(0x100)
+               .MarkLabel(target1)
+               .Movi(Register.R21, 21);
+
+            comp.LoadProgram(prg.Build());
+
+            comp.Step();
+            Assert.That(comp[Register.R19], Is.EqualTo(11));
+            var oldpc = comp.PC;
+            comp.Step();
+            Assert.That(comp[Register.R19], Is.EqualTo(oldpc + 1));
+            comp.Step();
+            Assert.That(comp[Register.R21], Is.EqualTo(21));
+
+            Assert.That(comp[Register.R20], Is.EqualTo(0));
+        }
+
+        [Test]
+        public void JalAndJrWorkingToghether()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+            var target2 = prg.CreateLabel();
+
+            prg.Movi(Register.R19, 11)
+               .Jal(R.Ra, target1)
+               .Movi(Register.R20, 12)
+               .Jmp(target2)
+               .SetOrg(0x100)
+               .MarkLabel(target1)
+               .Movi(Register.R21, 21)
+               .Jr(R.Ra)
+               .MarkLabel(target2);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+                      
+            Assert.That(comp[Register.R20], Is.EqualTo(12));
+            Assert.That(comp[Register.R21], Is.EqualTo(21));
+        }
     }
 }

@@ -6,6 +6,8 @@
         Ld,
         St,
         Jmp,
+        Jr,
+        Jal,
 
         // Offset format - OPCODE | RA | RB | OFFSET
         Addi, 

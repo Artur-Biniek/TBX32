@@ -100,8 +100,17 @@ namespace ArturBiniek.Tbx32.Simulator
                 case OpCode.St:
                     _ram[address] = _regs[ra];
                     break;
-                    
+
                 case OpCode.Jmp:
+                    _PC = address;
+                    break;
+
+                case OpCode.Jr:
+                    _PC = (uint)_regs[ra];
+                    break;
+
+                case OpCode.Jal:
+                    _regs[ra] = (int)_PC;
                     _PC = address;
                     break;
 
