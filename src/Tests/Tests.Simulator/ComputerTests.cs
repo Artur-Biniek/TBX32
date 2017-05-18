@@ -172,5 +172,31 @@ namespace Tests.Simulator
                 Assert.That(comp[(Register)i], Is.EqualTo((i + 1) * 2));
             }
         }
+
+        [Test]
+        public void ShlImmediateInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+            var expected = 1;
+
+            prg.Movi(0, (short)expected);
+            for (int i = 0; i < 16; i++)
+            {
+                prg.Shli((Register)(i + 1), (Register)0, (short)i);                              
+            }
+
+            comp.LoadProgram(prg.Build());
+
+            comp.Step();
+            for (int i = 0; i < 16; i++)
+            {
+                comp.Step();
+
+                expected = 1 << i;
+
+                Assert.That(comp[(Register)(i + 1)], Is.EqualTo(expected));
+            }
+        }
     }
 }

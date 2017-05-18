@@ -87,6 +87,10 @@ namespace ArturBiniek.Tbx32.Simulator
                 case OpCode.Movi:
                     _regs[ra] = offset;
                     break;
+
+                case OpCode.Shli:
+                    _regs[ra] = _regs[rb] << offset;
+                    break;
             }
         }
     }

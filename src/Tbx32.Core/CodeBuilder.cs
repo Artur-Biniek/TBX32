@@ -77,5 +77,10 @@ namespace Tbx32.Core
         {
             return push(createOffsetType(OpCode.Movi, target, Register.R0, value));
         }
+
+        public CodeBuilder Shli(Register target, Register source, short value)
+        {
+            return push(createOffsetType(OpCode.Shli, target, source, value));
+        }
     }
 }

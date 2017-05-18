@@ -6,5 +6,7 @@
         Addi = 0xF, 
         Subi,
         Movi,
+        Shli,
+        Shri,
     }
 }
