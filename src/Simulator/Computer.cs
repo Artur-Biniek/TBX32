@@ -89,6 +89,10 @@ namespace ArturBiniek.Tbx32.Simulator
                     _regs[ra] = _ram[address];
                     break;
 
+                case OpCode.St:
+                    _ram[address] = _regs[ra];
+                    break;
+
                 case OpCode.Addi:
                     _regs[ra] = _regs[rb] + offset;
                     break;

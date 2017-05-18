@@ -284,7 +284,7 @@ namespace Tests.Simulator
                .Data(val1)
                .MarkLabel(lbl2)
                .Data(val2);
-           
+
             comp.LoadProgram(prg.Build());
 
             Assert.That(comp[0xFFFE], Is.EqualTo(val1));
@@ -297,6 +297,27 @@ namespace Tests.Simulator
             Assert.That(comp[Register.R16], Is.EqualTo(val2));
         }
 
+        [Test]
+        [TestCase(112u, 5340)]
+        [TestCase(1784u, 4130)]
+        [TestCase(100u, -1234)]
+        public void StInstructionShouldWork(uint addr, short value)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
 
+            var variable = prg.CreateLabel();
+
+            prg.Movi(Register.R17, value)
+               .St(Register.R17, variable)
+               .SetOrg(addr)
+               .MarkLabel(variable);
+
+            comp.LoadProgram(prg.Build());
+            comp.Step();
+            comp.Step();
+
+            Assert.That(comp[addr], Is.EqualTo(value));           
+        }
     }
 }

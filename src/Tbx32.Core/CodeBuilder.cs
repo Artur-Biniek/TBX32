@@ -178,5 +178,10 @@ namespace Tbx32.Core
         {
             return pushDelayed(() => createAddressType(OpCode.Ld, target, source));
         }
+
+        public CodeBuilder St(Register source, Label target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.St, source, target));
+        }
     }
 }
