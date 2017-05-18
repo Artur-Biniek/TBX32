@@ -71,6 +71,14 @@ namespace ArturBiniek.Tbx32.Simulator
             }
         }
 
+        public void Run()
+        {
+            while (_ram[_PC] != 0)
+            {
+                Step();
+            }
+        }
+
         public void Step()
         {
             _IR = (uint)_ram[_PC];
@@ -91,6 +99,10 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 case OpCode.St:
                     _ram[address] = _regs[ra];
+                    break;
+                    
+                case OpCode.Jmp:
+                    _PC = address;
                     break;
 
                 case OpCode.Addi:

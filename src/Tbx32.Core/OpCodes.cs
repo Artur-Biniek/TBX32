@@ -5,9 +5,10 @@
         // Address format - OPCODE | RA | ADDRESS
         Ld,
         St,
+        Jmp,
 
         // Offset format - OPCODE | RA | RB | OFFSET
-        Addi = 0xF, 
+        Addi, 
         Subi,
         Movi,
         Shli,

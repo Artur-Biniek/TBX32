@@ -10,7 +10,7 @@ namespace Tbx32.Core
         private uint _index;
 
         private Dictionary<Label, uint> _labels = new Dictionary<Label, uint>();
-        private Dictionary<uint, uint> _code = new Dictionary<uint, uint>();
+        private SortedDictionary<uint, uint> _code = new SortedDictionary<uint, uint>();
         private readonly List<Tuple<uint, Func<uint>>> _delayedConstruction = new List<Tuple<uint, Func<uint>>>();
 
         private uint createOffsetType(OpCode opcode, Register reg1, Register reg2, short value)
@@ -182,6 +182,11 @@ namespace Tbx32.Core
         public CodeBuilder St(Register source, Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.St, source, target));
+        }
+
+        public CodeBuilder Jmp(Label target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.Jmp, (Register)0, target));
         }
     }
 }

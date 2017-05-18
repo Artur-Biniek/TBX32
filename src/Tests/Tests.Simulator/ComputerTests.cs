@@ -317,7 +317,34 @@ namespace Tests.Simulator
             comp.Step();
             comp.Step();
 
-            Assert.That(comp[addr], Is.EqualTo(value));           
+            Assert.That(comp[addr], Is.EqualTo(value));
+        }
+
+        [Test]
+        public void JmpInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+            var target2 = prg.CreateLabel();
+
+            prg.Movi(Register.R19, 20)
+               .Jmp(target1)
+               .Movi(Register.R20, 11)
+               .MarkLabel(target1)
+               .Movi(Register.R20, 21)
+               .Jmp(target2)
+               .Movi(Register.R21, 12)
+               .MarkLabel(target2)
+               .Movi(Register.R21, 22);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R19], Is.EqualTo(20));
+            Assert.That(comp[Register.R20], Is.EqualTo(21));
+            Assert.That(comp[Register.R21], Is.EqualTo(22));
         }
     }
 }
