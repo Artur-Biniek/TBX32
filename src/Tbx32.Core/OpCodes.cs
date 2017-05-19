@@ -10,8 +10,10 @@
         Jal,
 
         // Offset format - OPCODE | RA | RB | OFFSET
+        Str,
         Addi, 
         Movi,
+        Mov,
         Shli,
         Shri,
         Muli,

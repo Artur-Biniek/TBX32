@@ -418,9 +418,47 @@ namespace Tests.Simulator
 
             comp.LoadProgram(prg.Build());
             comp.Run();
-                      
+
             Assert.That(comp[Register.R20], Is.EqualTo(12));
             Assert.That(comp[Register.R21], Is.EqualTo(21));
+        }
+
+
+        [Test]
+        public void MovShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R0, 1234)
+               .Mov(Register.R1, Register.R0)
+               .Mov(Register.R2, Register.R1)
+               .Mov(Register.R3, Register.R2);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R0], Is.EqualTo(1234));
+            Assert.That(comp[Register.R1], Is.EqualTo(1234));
+            Assert.That(comp[Register.R2], Is.EqualTo(1234));
+            Assert.That(comp[Register.R3], Is.EqualTo(1234));
+        }
+
+        [Test]
+        public void StrShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R0, 1234)
+               .Movi(Register.R1, 0x1111)
+               .Str(Register.R0, Register.R1);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[0x1111], Is.EqualTo(1234));
+           
         }
     }
 }

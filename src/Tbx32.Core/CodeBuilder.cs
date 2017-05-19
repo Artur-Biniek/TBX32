@@ -84,9 +84,16 @@ namespace Tbx32.Core
             return new System.Collections.ObjectModel.ReadOnlyDictionary<uint, uint>(_code);
         }
 
-        public Label CreateLabel()
+        public Label CreateLabel(uint? address = null)
         {
-            return new Label();
+            var label = new Label();
+
+            if (address != null)
+            {
+                _labels[label] = address.Value;
+            }
+
+            return label;
         }
 
         public CodeBuilder MarkLabel(Label lbl)
@@ -149,6 +156,11 @@ namespace Tbx32.Core
             return push(createOffsetType(OpCode.Movi, target, Register.R0, value));
         }
 
+        public CodeBuilder Mov(Register target, Register source)
+        {
+            return push(createOffsetType(OpCode.Mov, target, source, 0));
+        }
+
         public CodeBuilder Shli(Register target, Register source, short value)
         {
             return push(createOffsetType(OpCode.Shli, target, source, value));
@@ -177,6 +189,11 @@ namespace Tbx32.Core
         public CodeBuilder St(Register source, Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.St, source, target));
+        }
+
+        public CodeBuilder Str(Register source, Register target)
+        {
+            return pushDelayed(() => createOffsetType(OpCode.Str, source, target, 0));
         }
 
         public CodeBuilder Jmp(Label target)

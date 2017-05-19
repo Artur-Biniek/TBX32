@@ -14,6 +14,9 @@
         <Grid x:Name="grdLedScreen" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Top" />
 
 
-        <TextBlock Text="Hello" Grid.Column="1" />
+        <StackPanel Orientation="Vertical" Grid.Column="1">
+            <Button x:Name="btnReset" Content="Reset" Click="btnReset_Click" />
+            <Button x:Name="btnStep" Content="Step" Click="btnStep_Click" />
+        </StackPanel>
     </Grid>
 </Window>
