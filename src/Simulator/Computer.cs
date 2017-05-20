@@ -161,6 +161,10 @@ namespace ArturBiniek.Tbx32.Simulator
                         case XtdOpCode.Shl:
                             _regs[ra] = _regs[rb] << _regs[rc];
                             break;
+
+                        case XtdOpCode.Shr:
+                            _regs[ra] = (int)((uint)_regs[rb] >> _regs[rc]);
+                            break;
                     }
                     break;
             }

@@ -507,10 +507,11 @@ namespace Tests.Simulator
         [Test]
         [TestCase(0)]
         [TestCase(1)]
+        [TestCase(-1)]
         [TestCase(124)]
         [TestCase(14)]
         [TestCase(-124)]
-        [TestCase(0xFFFF)]
+        [TestCase(0xFFFF)]              
         public void ShlShouldWork(int a)
         {
             for (int i = 0; i < 31; i++)
@@ -518,14 +519,54 @@ namespace Tests.Simulator
                 var prg = new CodeBuilder();
                 var comp = new Computer();
 
-                prg.Movi(Register.R15, (short)a)
+                var skip = prg.CreateLabel();
+                var val = prg.CreateLabel();
+
+                prg.Jmp(skip)
+                   .MarkLabel(val)
+                   .Data(a)
+                   .MarkLabel(skip)
+                   .Ld(Register.R15, val)
                    .Movi(Register.R16, (short)i)
                    .Shl(Register.R17, Register.R15, Register.R16);
 
                 comp.LoadProgram(prg.Build());
                 comp.Run();
 
-                Assert.That(comp[Register.R17], Is.EqualTo((short)a << i));
+                Assert.That(comp[Register.R17], Is.EqualTo(a << i));
+            }
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(-1)]
+        [TestCase(124)]
+        [TestCase(14)]
+        [TestCase(-124)]
+        [TestCase(0xFFFF)]
+        public void ShrShouldWork(int a)
+        {
+            for (int i = 0; i < 31; i++)
+            {
+                var prg = new CodeBuilder();
+                var comp = new Computer();
+
+                var skip = prg.CreateLabel();
+                var val = prg.CreateLabel();
+
+                prg.Jmp(skip)
+                   .MarkLabel(val)
+                   .Data(a)
+                   .MarkLabel(skip)
+                   .Ld(Register.R15, val)
+                   .Movi(Register.R16, (short)i)
+                   .Shr(Register.R17, Register.R15, Register.R16);
+
+                comp.LoadProgram(prg.Build());
+                comp.Run();
+
+                Assert.That(comp[Register.R17], Is.EqualTo((int)((uint)a >> i)));
             }
         }
     }
