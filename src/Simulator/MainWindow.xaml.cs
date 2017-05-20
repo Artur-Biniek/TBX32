@@ -51,6 +51,7 @@ namespace ArturBiniek.Tbx32.Simulator
                         .Jmp(loop)
                         .MarkLabel(video)
                         .Data((int)Computer.VIDEO_START)
+
                         .SetOrg(Computer.VIDEO_START)
                         .Data(0x01, 0x02, 0x04, 0x08, 0x10)
                         .Build();

@@ -25,6 +25,19 @@ namespace Tbx32.Core
             return res;
         }
 
+        private uint createXtdType(XtdOpCode xtdOpCode, Register reg1, Register reg2, Register reg3)
+        {
+            uint res = 0u;
+
+            res = (uint)OpCode.Xtd << 26
+                | (uint)reg1 << 21
+                | (uint)reg2 << 16
+                | (uint)reg3 << 11
+                | (uint)xtdOpCode;
+
+            return res;
+        }
+
         private uint createAddressType(OpCode opcode, Register reg, Label lbl)
         {
             if (lbl != null && !_labels.ContainsKey(lbl))
@@ -71,6 +84,11 @@ namespace Tbx32.Core
         public static uint ExtractAddress(uint instruction)
         {
             return instruction & 0x001FFFFF;
+        }
+
+        public static XtdOpCode ExtractXtdOpCode(uint instruction)
+        {
+            return (XtdOpCode)(instruction & 0xF);
         }
         #endregion
 
@@ -209,6 +227,41 @@ namespace Tbx32.Core
         public CodeBuilder Jal(Register linkRegister, Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.Jal, linkRegister, target));
+        }
+
+        public CodeBuilder Add(Register target, Register leftSource, Register rightSource)
+        {
+            return pushDelayed(() => createXtdType(XtdOpCode.Add, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Sub(Register target, Register leftSource, Register rightSource)
+        {
+            return pushDelayed(() => createXtdType(XtdOpCode.Sub, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Shl(Register target, Register leftSource, Register rightSource)
+        {
+            return pushDelayed(() => createXtdType(XtdOpCode.Shl, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Shr(Register target, Register leftSource, Register rightSource)
+        {
+            return pushDelayed(() => createXtdType(XtdOpCode.Shr, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Mul(Register target, Register leftSource, Register rightSource)
+        {
+            return pushDelayed(() => createXtdType(XtdOpCode.Mul, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Div(Register target, Register leftSource, Register rightSource)
+        {
+            return pushDelayed(() => createXtdType(XtdOpCode.Div, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Mod(Register target, Register leftSource, Register rightSource)
+        {
+            return pushDelayed(() => createXtdType(XtdOpCode.Mod, target, leftSource, rightSource));
         }
     }
 }

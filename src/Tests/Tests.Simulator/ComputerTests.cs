@@ -458,7 +458,75 @@ namespace Tests.Simulator
             comp.Run();
 
             Assert.That(comp[0x1111], Is.EqualTo(1234));
-           
+        }
+
+        [Test]
+        [TestCase(124, 345)]
+        [TestCase(14, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        public void AddShouldWork(short a, short b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R20, a)
+               .Movi(Register.R21, b)
+               .Add(Register.R22, Register.R20, Register.R21)
+               .Add(Register.R23, Register.R21, Register.R20);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R22], Is.EqualTo(a + b));
+            Assert.That(comp[Register.R23], Is.EqualTo(b + a));
+        }
+
+        [Test]
+        [TestCase(124, 345)]
+        [TestCase(14, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        public void SubShouldWork(short a, short b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R20, a)
+               .Movi(Register.R21, b)
+               .Sub(Register.R22, Register.R20, Register.R21)
+               .Sub(Register.R23, Register.R21, Register.R20);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R22], Is.EqualTo(a - b));
+            Assert.That(comp[Register.R23], Is.EqualTo(b - a));
+        }
+
+        [Test]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(124)]
+        [TestCase(14)]
+        [TestCase(-124)]
+        [TestCase(0xFFFF)]
+        public void ShlShouldWork(int a)
+        {
+            for (int i = 0; i < 31; i++)
+            {
+                var prg = new CodeBuilder();
+                var comp = new Computer();
+
+                prg.Movi(Register.R15, (short)a)
+                   .Movi(Register.R16, (short)i)
+                   .Shl(Register.R17, Register.R15, Register.R16);
+
+                comp.LoadProgram(prg.Build());
+                comp.Run();
+
+                Assert.That(comp[Register.R17], Is.EqualTo((short)a << i));
+            }
         }
     }
 }

@@ -11,12 +11,15 @@
 
         // Offset format - OPCODE | RA | RB | OFFSET
         Str,
-        Addi, 
-        Movi,
         Mov,
+
+        Movi,
+        Addi,         
         Shli,
         Shri,
         Muli,
         Divi,
+
+        Xtd = 0b111111
     }
 }

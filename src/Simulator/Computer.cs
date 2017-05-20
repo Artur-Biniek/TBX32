@@ -145,6 +145,24 @@ namespace ArturBiniek.Tbx32.Simulator
                 case OpCode.Divi:
                     _regs[ra] = _regs[rb] / offset;
                     break;
+
+                case OpCode.Xtd:
+                    XtdOpCode fun = CodeBuilder.ExtractXtdOpCode(_IR);
+                    switch (fun)
+                    {
+                        case XtdOpCode.Sub:
+                            _regs[ra] = _regs[rb] - _regs[rc];
+                            break;
+
+                        case XtdOpCode.Add:
+                            _regs[ra] = _regs[rb] + _regs[rc];
+                            break;
+
+                        case XtdOpCode.Shl:
+                            _regs[ra] = _regs[rb] << _regs[rc];
+                            break;
+                    }
+                    break;
             }
         }
     }
