@@ -2,6 +2,8 @@
 {
     public enum OpCode
     {
+        Hlt = 0,
+
         // Address format - OPCODE | RA | ADDRESS
         Ld,
         St,
@@ -19,6 +21,8 @@
         Shri,
         Muli,
         Divi,
+
+        Nop = 0b111110,
 
         Xtd = 0b111111
     }

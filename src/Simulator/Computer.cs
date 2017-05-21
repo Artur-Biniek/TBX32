@@ -73,10 +73,11 @@ namespace ArturBiniek.Tbx32.Simulator
 
         public void Run()
         {
-            while (_ram[_PC] != 0)
+            do
             {
                 Step();
             }
+            while (_IR != (uint)OpCode.Hlt);          
         }
 
         public void Step()
@@ -144,6 +145,13 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 case OpCode.Divi:
                     _regs[ra] = _regs[rb] / offset;
+                    break;
+
+                case OpCode.Nop:
+                    break;
+
+                case OpCode.Hlt:
+                    _PC--;
                     break;
 
                 case OpCode.Xtd:

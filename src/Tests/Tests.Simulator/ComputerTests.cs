@@ -664,5 +664,104 @@ namespace Tests.Simulator
 
             Assert.That(comp[Register.R17], Is.EqualTo(a % b));
         }
+
+        [Test]
+        public void NopShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Nop()
+                .Nop()
+                .Nop()
+                .Nop();
+
+            comp.LoadProgram(prg.Build());
+
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 0);
+
+            comp.Step();
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 1);
+
+            comp.Step();
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 2);
+
+            comp.Step();
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 3);
+
+            comp.Step();
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 4);
+        }
+
+        [Test]
+        public void HltShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Hlt()
+                .Movi(Register.R0, 1)
+                .Movi(Register.R1, 2)
+                .Movi(Register.R2, 3);
+
+            comp.LoadProgram(prg.Build());
+
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 0);
+
+            comp.Step();
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 0);
+
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 0);
+
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 0);
+
+            for (int i = 0; i < 32; i++)
+            {
+                Assert.That(comp[(Register)i] == 0);
+            }
+            Assert.That(comp.PC == 0);
+        }
+
+        [Test]
+        public void HltIsEncodedAsZero()
+        {
+            Assert.That((uint)OpCode.Hlt == 0);
+        }
     }
 }

@@ -211,7 +211,7 @@ namespace Tbx32.Core
 
         public CodeBuilder Str(Register source, Register target)
         {
-            return pushDelayed(() => createOffsetType(OpCode.Str, source, target, 0));
+            return push(createOffsetType(OpCode.Str, source, target, 0));
         }
 
         public CodeBuilder Jmp(Label target)
@@ -221,7 +221,7 @@ namespace Tbx32.Core
 
         public CodeBuilder Jr(Register target)
         {
-            return pushDelayed(() => createAddressType(OpCode.Jr, target, null));
+            return push(createAddressType(OpCode.Jr, target, null));
         }
 
         public CodeBuilder Jal(Register linkRegister, Label target)
@@ -231,37 +231,47 @@ namespace Tbx32.Core
 
         public CodeBuilder Add(Register target, Register leftSource, Register rightSource)
         {
-            return pushDelayed(() => createXtdType(XtdOpCode.Add, target, leftSource, rightSource));
+            return push(createXtdType(XtdOpCode.Add, target, leftSource, rightSource));
         }
 
         public CodeBuilder Sub(Register target, Register leftSource, Register rightSource)
         {
-            return pushDelayed(() => createXtdType(XtdOpCode.Sub, target, leftSource, rightSource));
+            return push(createXtdType(XtdOpCode.Sub, target, leftSource, rightSource));
         }
 
         public CodeBuilder Shl(Register target, Register leftSource, Register rightSource)
         {
-            return pushDelayed(() => createXtdType(XtdOpCode.Shl, target, leftSource, rightSource));
+            return push(createXtdType(XtdOpCode.Shl, target, leftSource, rightSource));
         }
 
         public CodeBuilder Shr(Register target, Register leftSource, Register rightSource)
         {
-            return pushDelayed(() => createXtdType(XtdOpCode.Shr, target, leftSource, rightSource));
+            return push(createXtdType(XtdOpCode.Shr, target, leftSource, rightSource));
         }
 
         public CodeBuilder Mul(Register target, Register leftSource, Register rightSource)
         {
-            return pushDelayed(() => createXtdType(XtdOpCode.Mul, target, leftSource, rightSource));
+            return push(createXtdType(XtdOpCode.Mul, target, leftSource, rightSource));
         }
 
         public CodeBuilder Div(Register target, Register leftSource, Register rightSource)
         {
-            return pushDelayed(() => createXtdType(XtdOpCode.Div, target, leftSource, rightSource));
+            return push(createXtdType(XtdOpCode.Div, target, leftSource, rightSource));
         }
 
         public CodeBuilder Mod(Register target, Register leftSource, Register rightSource)
         {
-            return pushDelayed(() => createXtdType(XtdOpCode.Mod, target, leftSource, rightSource));
+            return push(createXtdType(XtdOpCode.Mod, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Nop()
+        {
+            return push(createAddressType(OpCode.Nop, 0, null));
+        }
+
+        public CodeBuilder Hlt()
+        {
+            return push(createAddressType(OpCode.Hlt, 0, null));
         }
     }
 }
