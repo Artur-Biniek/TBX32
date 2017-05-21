@@ -5,19 +5,22 @@
         Hlt = 0,
 
         // Address format - OPCODE | RA | ADDRESS
-        Ld,         // Load
-        St,         // Store
+        Ld,             // Load
+        St,             // Store
 
-        Jmp,        // Jump (unconditionaly)
-        Jmpr,       // Jump Register (unconditionally)
-        Jal,        // Jump And Link (unconditinoally)
+        Jmp,            // Jump (unconditionaly)
+        Jmpr,           // Jump Register (unconditionally)
+        Jal,            // Jump And Link (unconditinoally)
 
-        Brz,        // Branch if Zero
-        Brnz,       // Branch if Not Zero
+        Brz,            // Branch if Zero
+        Brnz,           // Branch if Not Zero
 
         // Offset format - OPCODE | RA | RB | OFFSET
-        Ldr,        // Load Register
-        Str,        // Store Register
+        Ldr,            // Load Register
+        Str,            // Store Register
+
+        Beq,            // Branch Equal
+        Bneq,           // Branch Not Equal
 
         Movi,
         Addi,         

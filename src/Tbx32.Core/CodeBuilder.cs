@@ -25,6 +25,32 @@ namespace Tbx32.Core
             return res;
         }
 
+        private uint createOffsetType(OpCode opcode, Register reg1, Register reg2, uint oldPc, Label target)
+        {
+            uint res = 0u;
+
+            uint address = _labels[target];
+            var nextInstrAddress = oldPc;
+
+            uint offset = (address > nextInstrAddress) ? address - nextInstrAddress : nextInstrAddress - address;
+
+            if (offset > short.MaxValue || -offset < short.MinValue)
+            {
+                throw new InvalidOperationException("Offset out of 16bit signed value range");
+
+                // TODO: should we handle artificially injected "long" jumps?
+            }
+
+            short value = (short)(address > nextInstrAddress ? offset : -offset);
+
+            res = (uint)opcode << 26
+                | (uint)reg1 << 21
+                | (uint)reg2 << 16
+                | (ushort)value;
+
+            return res;
+        }
+
         private uint createXtdType(XtdOpCode xtdOpCode, Register reg1, Register reg2, Register reg3)
         {
             uint res = 0u;
@@ -47,6 +73,11 @@ namespace Tbx32.Core
 
             uint res = 0u;
             uint address = lbl == null ? 0u : _labels[lbl];
+
+            if ((address & ~0x001FFFFF) != 0)
+            {
+                throw new InvalidOperationException("Label out of 21 bit addresable range");
+            }
 
             res = (uint)opcode << 26
                 | (uint)reg << 21
@@ -212,6 +243,18 @@ namespace Tbx32.Core
         public CodeBuilder Str(Register source, Register target, short offset = 0)
         {
             return push(createOffsetType(OpCode.Str, source, target, offset));
+        }
+
+        public CodeBuilder Beq(Register left, Register right, Label target)
+        {
+            var addrOfNextInstruction = _index + 1;
+            return pushDelayed(() => createOffsetType(OpCode.Beq, left, right, addrOfNextInstruction, target));
+        }
+
+        public CodeBuilder Bneq(Register left, Register right, Label target)
+        {
+            var addrOfNextInstruction = _index + 1;
+            return pushDelayed(() => createOffsetType(OpCode.Bneq, left, right, addrOfNextInstruction, target));
         }
 
         public CodeBuilder Jmp(Label target)

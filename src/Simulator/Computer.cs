@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Tbx32.Core;
 
 namespace ArturBiniek.Tbx32.Simulator
@@ -136,6 +135,20 @@ namespace ArturBiniek.Tbx32.Simulator
                     if (_regs[ra] != 0)
                     {
                         _PC = address;
+                    }
+                    break;
+
+                case OpCode.Beq:
+                    if (_regs[ra] == _regs[rb])
+                    {
+                        _PC = (uint)(_PC + offset);
+                    }
+                    break;
+
+                case OpCode.Bneq:
+                    if (_regs[ra] != _regs[rb])
+                    {
+                        _PC = (uint)(_PC + offset);
                     }
                     break;
 

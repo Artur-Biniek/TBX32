@@ -943,5 +943,101 @@ namespace Tests.Simulator
 
             Assert.That(comp[R.G1] == 55);
         }
+
+        [Test]
+        public void BeqJumpsWhenRegistersAreEqual()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movi(R.T0, 1)
+                .Movi(R.T1, 1)
+                .Beq(R.T0, R.T1, target1)
+                .Hlt()
+                .MarkLabel(target1)
+                .Movi(R.G0, 432)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == 432);
+        }
+
+        [Test]
+        public void BeqCanJumpBackWhenRegistersAreEqual()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var actualStart = prg.CreateLabel();
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Jmp(actualStart)
+                .MarkLabel(target1)
+                .Movi(R.G0, -765)
+                .Hlt()
+                .MarkLabel(actualStart)
+                .Movi(R.T0, 1)
+                .Movi(R.T1, 1)
+                .Beq(R.T0, R.T1, target1)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == -765);
+        }
+
+        [Test]
+        public void BneqJumpsWhenRegistersAreNotEqual()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movi(R.T0, 1)
+                .Movi(R.T1, 0)
+                .Bneq(R.T0, R.T1, target1)
+                .Hlt()
+                .MarkLabel(target1)
+                .Movi(R.G0, 1432)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == 1432);
+        }
+
+        [Test]
+        public void BneqDoesNotJumpWhenRegistersAreEqual()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movi(R.T0, 12)
+                .Movi(R.T1, 12)
+                .Bneq(R.T0, R.T1, target1)
+                .Movi(R.G0, 1432)
+                .Hlt()
+                .MarkLabel(target1)
+                .Movi(R.G0, 5674)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == 1432);
+        }
     }
 }
