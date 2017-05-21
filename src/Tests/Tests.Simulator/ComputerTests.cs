@@ -8,6 +8,34 @@ namespace Tests.Simulator
     public class ComputerTests
     {
         [Test]
+        public void StackPointerShouldStartWithCorrectValue()
+        {
+            Computer comp = new Computer();
+
+            Assert.That(comp[R.Sp] == Computer.STACK_BOTTOM);
+
+            comp.Run();
+
+            Assert.That(comp[R.Sp] == Computer.STACK_BOTTOM);
+        }
+
+        [Test]
+        public void StackPointerShouldResetWithComputerReset()
+        {
+            Computer comp = new Computer();
+
+            comp.LoadProgram(new CodeBuilder().Addi(R.Sp, R.Sp, -1).Build());
+
+            Assert.That(comp[R.Sp] == Computer.STACK_BOTTOM);
+
+            comp.Run();
+            Assert.That(comp[R.Sp] == Computer.STACK_BOTTOM - 1);
+
+            comp.Reset();
+            Assert.That(comp[R.Sp] == Computer.STACK_BOTTOM);
+        }
+
+        [Test]
         public void ProgramCounterShouldIncrementOnEveryNonJumpInstruction()
         {
             var someadds = new CodeBuilder()
@@ -136,14 +164,18 @@ namespace Tests.Simulator
         [Test]
         public void SubImmediateThroughAddImmediateInstructionShouldWork()
         {
+            var comp = new Computer();
+
             var prg = new CodeBuilder()
+                    .Movi(Register.R30, 0)
                     .Addi(Register.R31, Register.R30, -10)
                     .Addi(Register.R29, Register.R31, 20)
                     .Build();
 
-            Computer comp = new Computer();
-
             comp.LoadProgram(prg);
+
+            comp.Step();
+            Assert.That(comp[Register.R30], Is.EqualTo(0));
 
             comp.Step();
             Assert.That(comp[Register.R31], Is.EqualTo(-10));
@@ -670,6 +702,12 @@ namespace Tests.Simulator
         {
             var prg = new CodeBuilder();
             var comp = new Computer();
+            var oldVals = new int[32];
+
+            for (int i = 0; i < 32; i++)
+            {
+                oldVals[i] = comp[(Register)i];
+            }
 
             prg.Nop()
                 .Nop()
@@ -680,35 +718,35 @@ namespace Tests.Simulator
 
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 0);
 
             comp.Step();
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 1);
 
             comp.Step();
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 2);
 
             comp.Step();
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 3);
 
             comp.Step();
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 4);
         }
@@ -718,6 +756,12 @@ namespace Tests.Simulator
         {
             var prg = new CodeBuilder();
             var comp = new Computer();
+            var oldVals = new int[32];
+
+            for (int i = 0; i < 32; i++)
+            {
+                oldVals[i] = comp[(Register)i]; ;
+            }
 
             prg.Hlt()
                 .Movi(Register.R0, 1)
@@ -728,32 +772,32 @@ namespace Tests.Simulator
 
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 0);
 
             comp.Step();
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 0);
 
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 0);
 
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 0);
 
             for (int i = 0; i < 32; i++)
             {
-                Assert.That(comp[(Register)i] == 0);
+                Assert.That(comp[(Register)i] == oldVals[i]);
             }
             Assert.That(comp.PC == 0);
         }

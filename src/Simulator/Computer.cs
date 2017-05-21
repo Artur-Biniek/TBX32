@@ -57,10 +57,12 @@ namespace ArturBiniek.Tbx32.Simulator
         }
 
         public void Reset()
-        {
+        {            
             _PC = 0u;
             _ram.Reset();
             _regs.Reset();
+
+            _regs[R.Sp] = (int)STACK_BOTTOM;
         }
 
         public void LoadProgram(IReadOnlyDictionary<uint, uint> program)
