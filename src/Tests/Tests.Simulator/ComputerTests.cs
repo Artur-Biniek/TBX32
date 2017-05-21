@@ -1039,5 +1039,153 @@ namespace Tests.Simulator
 
             Assert.That(comp[R.G0] == 1432);
         }
+
+        [Test]
+        [TestCase(0, 0, true)]
+        [TestCase(10, 10, true)]
+        [TestCase(-10, -10, true)]
+        [TestCase(10, 0, true)]
+        [TestCase(-3, -56, true)]
+        [TestCase(0, 10, false)]
+        [TestCase(-10, -5, false)]
+        [TestCase(-5, 5, false)]
+        [TestCase(0, 1, false)]
+        [TestCase(34, 12, true)]
+        public void BgeJumpsWhenRegistersAreGreaterOrEqual(short left, short right, bool shouldJump)
+        {
+            const short VALUE_WHEN_NO_JUMP = 1234;
+            const short VALUE_WHEN_JUMMPED = 9876;
+
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var jumpLabel = prg.CreateLabel();
+
+            prg
+                .Movi(R.T0, left)
+                .Movi(R.T1, right)
+                .Bge(R.T0, R.T1, jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Hlt()
+                .MarkLabel(jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == (shouldJump ? VALUE_WHEN_JUMMPED : VALUE_WHEN_NO_JUMP));
+        }
+
+        [Test]
+        [TestCase(0, 0, true)]
+        [TestCase(10, 10, true)]
+        [TestCase(-10, -10, true)]
+        [TestCase(10, 0, false)]
+        [TestCase(-3, -56, false)]
+        [TestCase(0, 10, true)]
+        [TestCase(-10, -5, true)]
+        [TestCase(-5, 5, true)]
+        [TestCase(0, 1, true)]
+        [TestCase(34, 12, false)]
+        public void BleJumpsWhenRegistersAreLessOrEqual(short left, short right, bool shouldJump)
+        {
+            const short VALUE_WHEN_NO_JUMP = 1234;
+            const short VALUE_WHEN_JUMMPED = 9876;
+
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var jumpLabel = prg.CreateLabel();
+
+            prg
+                .Movi(R.T0, left)
+                .Movi(R.T1, right)
+                .Ble(R.T0, R.T1, jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Hlt()
+                .MarkLabel(jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == (shouldJump ? VALUE_WHEN_JUMMPED : VALUE_WHEN_NO_JUMP));
+        }
+
+        [Test]
+        [TestCase(0, 0, false)]
+        [TestCase(10, 10, false)]
+        [TestCase(-10, -10, false)]
+        [TestCase(10, 0, true)]
+        [TestCase(-3, -56, true)]
+        [TestCase(0, 10, false)]
+        [TestCase(-10, -5, false)]
+        [TestCase(-5, 5, false)]
+        [TestCase(0, 1, false)]
+        [TestCase(34, 12, true)]
+        public void BgtJumpsWhenFirstRegisterIsGreaterThanTheOther(short left, short right, bool shouldJump)
+        {
+            const short VALUE_WHEN_NO_JUMP = 1234;
+            const short VALUE_WHEN_JUMMPED = 9876;
+
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var jumpLabel = prg.CreateLabel();
+
+            prg
+                .Movi(R.T0, left)
+                .Movi(R.T1, right)
+                .Bgt(R.T0, R.T1, jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Hlt()
+                .MarkLabel(jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == (shouldJump ? VALUE_WHEN_JUMMPED : VALUE_WHEN_NO_JUMP));
+        }
+
+        [Test]
+        [TestCase(0, 0, false)]
+        [TestCase(10, 10, false)]
+        [TestCase(-10, -10, false)]
+        [TestCase(10, 0, false)]
+        [TestCase(-3, -56, false)]
+        [TestCase(0, 10, true)]
+        [TestCase(-10, -5, true)]
+        [TestCase(-5, 5, true)]
+        [TestCase(0, 1, true)]
+        [TestCase(34, 12, false)]
+        public void BltJumpsWhenFistRegisterIsLessThenTheOther(short left, short right, bool shouldJump)
+        {
+            const short VALUE_WHEN_NO_JUMP = 1234;
+            const short VALUE_WHEN_JUMMPED = 9876;
+
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var jumpLabel = prg.CreateLabel();
+
+            prg
+                .Movi(R.T0, left)
+                .Movi(R.T1, right)
+                .Blt(R.T0, R.T1, jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Hlt()
+                .MarkLabel(jumpLabel)
+                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G0] == (shouldJump ? VALUE_WHEN_JUMMPED : VALUE_WHEN_NO_JUMP));
+        }
     }
 }

@@ -152,6 +152,34 @@ namespace ArturBiniek.Tbx32.Simulator
                     }
                     break;
 
+                case OpCode.Bge:
+                    if (_regs[ra] >= _regs[rb])
+                    {
+                        _PC = (uint)(_PC + offset);
+                    }
+                    break;
+
+                case OpCode.Ble:
+                    if (_regs[ra] <= _regs[rb])
+                    {
+                        _PC = (uint)(_PC + offset);
+                    }
+                    break;
+
+                case OpCode.Bgt:
+                    if (_regs[ra] > _regs[rb])
+                    {
+                        _PC = (uint)(_PC + offset);
+                    }
+                    break;
+
+                case OpCode.Blt:
+                    if (_regs[ra] < _regs[rb])
+                    {
+                        _PC = (uint)(_PC + offset);
+                    }
+                    break;
+
                 case OpCode.Addi:
                     _regs[ra] = _regs[rb] + offset;
                     break;

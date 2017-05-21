@@ -257,6 +257,30 @@ namespace Tbx32.Core
             return pushDelayed(() => createOffsetType(OpCode.Bneq, left, right, addrOfNextInstruction, target));
         }
 
+        public CodeBuilder Bge(Register left, Register right, Label target)
+        {
+            var addrOfNextInstruction = _index + 1;
+            return pushDelayed(() => createOffsetType(OpCode.Bge, left, right, addrOfNextInstruction, target));
+        }
+
+        public CodeBuilder Ble(Register left, Register right, Label target)
+        {
+            var addrOfNextInstruction = _index + 1;
+            return pushDelayed(() => createOffsetType(OpCode.Ble, left, right, addrOfNextInstruction, target));
+        }
+
+        public CodeBuilder Bgt(Register left, Register right, Label target)
+        {
+            var addrOfNextInstruction = _index + 1;
+            return pushDelayed(() => createOffsetType(OpCode.Bgt, left, right, addrOfNextInstruction, target));
+        }
+
+        public CodeBuilder Blt(Register left, Register right, Label target)
+        {
+            var addrOfNextInstruction = _index + 1;
+            return pushDelayed(() => createOffsetType(OpCode.Blt, left, right, addrOfNextInstruction, target));
+        }
+
         public CodeBuilder Jmp(Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.Jmp, (Register)0, target));

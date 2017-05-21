@@ -21,6 +21,10 @@
 
         Beq,            // Branch Equal
         Bneq,           // Branch Not Equal
+        Bgt,            // Branch Greater
+        Bge,            // Branch Greater or Equal
+        Blt,            // Branch Less
+        Ble,            // Branch Less or Equal
 
         Movi,
         Addi,         
