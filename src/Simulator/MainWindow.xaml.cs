@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -30,26 +31,26 @@ namespace ArturBiniek.Tbx32.Simulator
 
             initializeScreen();
 
-            Reset();
+            reset();
 
             _dispatcherTimer.Interval = TimeSpan.FromMilliseconds(1); // TODO: this get's rounded to 30fps... need to fix it.
             _dispatcherTimer.Tick += _dispatcherTimer_Tick;
         }
 
-        private void _dispatcherTimer_Tick(object sender, EventArgs e)
+        private void reset()
         {
-            for (int i = 0; i < 33; i++)
-                _comp.Step();
+            _dispatcherTimer.IsEnabled = false;
+
+            var prg = createDiagonalLineProgram();
+
+            _comp = new Computer();
+            _comp.LoadProgram(prg);
 
             screenRefresh();
         }
 
-        private void Reset()
+        private IReadOnlyDictionary<uint, uint> createDiagonalLineProgram()
         {
-            _dispatcherTimer.IsEnabled = false;
-
-            _comp = new Computer();
-
             var builder = new CodeBuilder();
 
             var video = builder.CreateLabel();
@@ -97,16 +98,12 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Pop(R.Fp)
                             .Jmpr(R.Ra)
 
-
-
                         .MarkLabel(video)
-                        .Data((int)Computer.VIDEO_START)
+                            .Data((int)Computer.VIDEO_START)
 
                         .Build();
 
-            _comp.LoadProgram(prg);
-
-            screenRefresh();
+            return prg;
         }
 
         private void initializeScreen()
@@ -172,21 +169,29 @@ namespace ArturBiniek.Tbx32.Simulator
             }
         }
 
-        private void SimStep()
+        private void simStep()
         {
             _comp.Step();
 
             screenRefresh();
         }
 
+        private void _dispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            for (int i = 0; i < 33; i++)
+                _comp.Step();
+
+            screenRefresh();
+        }
+
         private void btnStep_Click(object sender, RoutedEventArgs e)
         {
-            SimStep();
+            simStep();
         }
 
         private void btnReset_Click(object sender, RoutedEventArgs e)
         {
-            Reset();
+            reset();
         }
 
         private void btnRun_Click(object sender, RoutedEventArgs e)
