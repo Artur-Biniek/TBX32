@@ -204,14 +204,19 @@ namespace Tbx32.Core
             return pushDelayed(() => createAddressType(OpCode.Ld, target, source));
         }
 
+        public CodeBuilder Ldr(Register source, Register target, short offset = 0)
+        {
+            return push(createOffsetType(OpCode.Ldr, source, target, offset));
+        }
+
         public CodeBuilder St(Register source, Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.St, source, target));
         }
 
-        public CodeBuilder Str(Register source, Register target)
+        public CodeBuilder Str(Register source, Register target, short offset = 0)
         {
-            return push(createOffsetType(OpCode.Str, source, target, 0));
+            return push(createOffsetType(OpCode.Str, source, target, offset));
         }
 
         public CodeBuilder Jmp(Label target)

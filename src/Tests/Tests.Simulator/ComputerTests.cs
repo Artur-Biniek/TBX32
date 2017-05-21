@@ -330,6 +330,33 @@ namespace Tests.Simulator
         }
 
         [Test]
+        public void LdrWithOffsetShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.CreateLabel(0x100 - 1);
+            prg.CreateLabel(0x100 + 1);
+
+            prg
+                .Movi(R.T1, 0x100)
+                .Ldr(R.T4, R.T1, -1)
+                .Ldr(R.T5, R.T1, +1)
+                .Hlt()
+                .SetOrg(0x100 - 1)
+                .Data(11)
+                .SetOrg(0x100 + 1)
+                .Data(12);
+
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.T4], Is.EqualTo(11));
+            Assert.That(comp[R.T5], Is.EqualTo(12));
+        }
+
+        [Test]
         [TestCase(112u, 5340)]
         [TestCase(1784u, 4130)]
         [TestCase(100u, -1234)]
@@ -490,6 +517,27 @@ namespace Tests.Simulator
             comp.Run();
 
             Assert.That(comp[0x1111], Is.EqualTo(1234));
+        }
+
+        [Test]
+        public void StrWithOffsetShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R0, 666)
+               .Movi(Register.R1, 0x1111)
+               .Addi(Register.R0, Register.R0, -1)
+               .Str(Register.R0, Register.R1, -1)
+               .Addi(Register.R0, Register.R0, 2)
+               .Str(Register.R0, Register.R1, +1);
+
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[0x1111 - 1], Is.EqualTo(666 - 1));
+            Assert.That(comp[0x1111 + 1], Is.EqualTo(666 + 1));
         }
 
         [Test]

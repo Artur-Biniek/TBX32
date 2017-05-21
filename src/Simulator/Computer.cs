@@ -100,12 +100,16 @@ namespace ArturBiniek.Tbx32.Simulator
                     _regs[ra] = _ram[address];
                     break;
 
+                case OpCode.Ldr:
+                    _regs[ra] = _ram[(uint)(_regs[rb] + offset)];
+                    break;
+
                 case OpCode.St:
                     _ram[address] = _regs[ra];
                     break;
 
                 case OpCode.Str:
-                    _ram[(uint)_regs[rb]] = _regs[ra];
+                    _ram[(uint)(_regs[rb] + offset)] = _regs[ra];
                     break;
 
                 case OpCode.Jmp:

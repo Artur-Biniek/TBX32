@@ -12,6 +12,7 @@
         Jal,
 
         // Offset format - OPCODE | RA | RB | OFFSET
+        Ldr,
         Str,
         Mov,
 
