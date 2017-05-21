@@ -38,7 +38,10 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private void _dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            SimStep();
+            for (int i = 0; i < 33; i++)
+                _comp.Step();
+
+            screenRefresh();
         }
 
         private void Reset()
@@ -188,11 +191,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private void btnRun_Click(object sender, RoutedEventArgs e)
         {
-            _comp.Run();
-            screenRefresh();
-
-            // TODO: Need to run simpulation on separate thread as simulating on dispatcher caps resolution to 30 updates per secon
-            //  _dispatcherTimer.IsEnabled = true;
+            _dispatcherTimer.IsEnabled = true;
         }
     }
 }
