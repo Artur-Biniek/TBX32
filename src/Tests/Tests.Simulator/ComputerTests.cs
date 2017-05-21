@@ -511,7 +511,7 @@ namespace Tests.Simulator
         [TestCase(124)]
         [TestCase(14)]
         [TestCase(-124)]
-        [TestCase(0xFFFF)]              
+        [TestCase(0xFFFF)]
         public void ShlShouldWork(int a)
         {
             for (int i = 0; i < 31; i++)
@@ -568,6 +568,101 @@ namespace Tests.Simulator
 
                 Assert.That(comp[Register.R17], Is.EqualTo((int)((uint)a >> i)));
             }
+        }
+
+        [Test]
+        [TestCase(124, 345)]
+        [TestCase(14, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        [TestCase(0, -312345)]
+        public void MulShouldWork(int a, int b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var skip = prg.CreateLabel();
+            var albl = prg.CreateLabel();
+            var blbl = prg.CreateLabel();
+
+            prg.Jmp(skip)
+               .MarkLabel(albl)
+               .Data(a)
+               .MarkLabel(blbl)
+               .Data(b)
+               .MarkLabel(skip)
+               .Ld(Register.R15, albl)
+               .Ld(Register.R16, blbl)
+               .Mul(Register.R17, Register.R15, Register.R16);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R17], Is.EqualTo(a * b));
+        }
+
+        [Test]
+        [TestCase(24, 345)]
+        [TestCase(145, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        [TestCase(-1024, -4)]
+        [TestCase(0, -312345)]
+        public void DivShouldWork(int a, int b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var skip = prg.CreateLabel();
+            var albl = prg.CreateLabel();
+            var blbl = prg.CreateLabel();
+
+            prg.Jmp(skip)
+               .MarkLabel(albl)
+               .Data(a)
+               .MarkLabel(blbl)
+               .Data(b)
+               .MarkLabel(skip)
+               .Ld(Register.R15, albl)
+               .Ld(Register.R16, blbl)
+               .Div(Register.R17, Register.R15, Register.R16);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R17], Is.EqualTo(a / b));
+        }
+
+        [Test]
+        [TestCase(24, 345)]
+        [TestCase(145, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        [TestCase(-1024, -4)]
+        [TestCase(0, -312345)]
+        public void ModShouldWork(int a, int b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var skip = prg.CreateLabel();
+            var albl = prg.CreateLabel();
+            var blbl = prg.CreateLabel();
+
+            prg.Jmp(skip)
+               .MarkLabel(albl)
+               .Data(a)
+               .MarkLabel(blbl)
+               .Data(b)
+               .MarkLabel(skip)
+               .Ld(Register.R15, albl)
+               .Ld(Register.R16, blbl)
+               .Mod(Register.R17, Register.R15, Register.R16);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R17], Is.EqualTo(a % b));
         }
     }
 }
