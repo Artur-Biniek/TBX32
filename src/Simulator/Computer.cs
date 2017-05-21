@@ -133,10 +133,6 @@ namespace ArturBiniek.Tbx32.Simulator
                     _regs[ra] = offset;
                     break;
 
-                case OpCode.Mov:
-                    _regs[ra] = _regs[rb];
-                    break;
-
                 case OpCode.Shli:
                     _regs[ra] = _regs[rb] << offset;
                     break;

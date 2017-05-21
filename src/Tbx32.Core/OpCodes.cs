@@ -7,6 +7,7 @@
         // Address format - OPCODE | RA | ADDRESS
         Ld,
         St,
+
         Jmp,
         Jr,
         Jal,
@@ -14,7 +15,6 @@
         // Offset format - OPCODE | RA | RB | OFFSET
         Ldr,
         Str,
-        Mov,
 
         Movi,
         Addi,         

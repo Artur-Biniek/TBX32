@@ -174,11 +174,6 @@ namespace Tbx32.Core
             return push(createOffsetType(OpCode.Movi, target, Register.R0, value));
         }
 
-        public CodeBuilder Mov(Register target, Register source)
-        {
-            return push(createOffsetType(OpCode.Mov, target, source, 0));
-        }
-
         public CodeBuilder Shli(Register target, Register source, short value)
         {
             return push(createOffsetType(OpCode.Shli, target, source, value));
@@ -204,9 +199,9 @@ namespace Tbx32.Core
             return pushDelayed(() => createAddressType(OpCode.Ld, target, source));
         }
 
-        public CodeBuilder Ldr(Register source, Register target, short offset = 0)
+        public CodeBuilder Ldr(Register target, Register source, short offset = 0)
         {
-            return push(createOffsetType(OpCode.Ldr, source, target, offset));
+            return push(createOffsetType(OpCode.Ldr, target, source, offset));
         }
 
         public CodeBuilder St(Register source, Label target)
