@@ -277,6 +277,28 @@ namespace Tests.Simulator
             Assert.That(comp[Register.R11], Is.EqualTo(4));
         }
 
+
+        [Test]
+        [TestCase(10, -1)]
+        [TestCase(10, 3)]
+        [TestCase(10, 4)]
+        [TestCase(-10, -3)]
+        [TestCase(0, 4)]
+        public void ModImmediateInstructionShouldWork(short a, short b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R10, a);
+            prg.Modi(Register.R11, Register.R10, b);
+
+            comp.LoadProgram(prg.Build());
+            comp.Step();
+            comp.Step();
+
+            Assert.That(comp[Register.R11], Is.EqualTo(a % b));
+        }
+
         [Test]
         [TestCase(-98, 23)]
         [TestCase(98, -23)]
@@ -1186,6 +1208,119 @@ namespace Tests.Simulator
             comp.Run();
 
             Assert.That(comp[R.G0] == (shouldJump ? VALUE_WHEN_JUMMPED : VALUE_WHEN_NO_JUMP));
+        }
+
+        [Test]
+        public void NegShouldWorkCorrectly()
+        {
+            for (short i = -10; i < 10; i++)
+            {
+                var prg = new CodeBuilder();
+                var comp = new Computer();
+
+                var jumpLabel = prg.CreateLabel();
+
+                prg
+                    .Movi(R.T0, i)
+                    .Neg(R.T1, R.T0)
+                    .Hlt();
+
+                comp.LoadProgram(prg.Build());
+                comp.Run();
+
+                Assert.That(comp[R.T1] == -i);
+            }
+        }
+
+        [Test]
+        public void NotShouldWorkCorrectly()
+        {
+            for (short i = -10; i < 10; i++)
+            {
+                var prg = new CodeBuilder();
+                var comp = new Computer();
+
+                var jumpLabel = prg.CreateLabel();
+
+                prg
+                    .Movi(R.T0, i)
+                    .Not(R.T1, R.T0)
+                    .Hlt();
+
+                comp.LoadProgram(prg.Build());
+                comp.Run();
+
+                Assert.That(comp[R.T1] == ~i);
+            }
+        }
+
+        [Test]
+        [TestCase(124, 345)]
+        [TestCase(14, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        [TestCase(1, 0)]
+        [TestCase(0, 0)]
+        [TestCase(1, -1)]
+        public void AndShouldWork(short a, short b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R20, a)
+               .Movi(Register.R21, b)
+               .And(Register.R22, Register.R20, Register.R21);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R22], Is.EqualTo(a & b));
+        }
+
+        [Test]
+        [TestCase(124, 345)]
+        [TestCase(14, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        [TestCase(1, 0)]
+        [TestCase(0, 0)]
+        [TestCase(1, -1)]
+        public void OrShouldWork(short a, short b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R20, a)
+               .Movi(Register.R21, b)
+               .Or(Register.R22, Register.R20, Register.R21);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R22], Is.EqualTo(a | b));
+        }
+
+        [Test]
+        [TestCase(124, 345)]
+        [TestCase(14, 345)]
+        [TestCase(124, -34)]
+        [TestCase(-12, -3)]
+        [TestCase(1, 0)]
+        [TestCase(0, 0)]
+        [TestCase(1, -1)]
+        public void XorShouldWork(short a, short b)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R20, a)
+               .Movi(Register.R21, b)
+               .Xor(Register.R22, Register.R20, Register.R21);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R22], Is.EqualTo(a ^ b));
         }
     }
 }

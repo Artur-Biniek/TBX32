@@ -204,6 +204,10 @@ namespace ArturBiniek.Tbx32.Simulator
                     _regs[ra] = _regs[rb] / offset;
                     break;
 
+                case OpCode.Modi:
+                    _regs[ra] = _regs[rb] % offset;
+                    break;
+
                 case OpCode.Nop:
                     break;
 
@@ -241,6 +245,26 @@ namespace ArturBiniek.Tbx32.Simulator
 
                         case XtdOpCode.Mod:
                             _regs[ra] = _regs[rb] % _regs[rc];
+                            break;
+
+                        case XtdOpCode.And:
+                            _regs[ra] = _regs[rb] & _regs[rc];
+                            break;
+
+                        case XtdOpCode.Or:
+                            _regs[ra] = _regs[rb] | _regs[rc];
+                            break;
+
+                        case XtdOpCode.Xor:
+                            _regs[ra] = _regs[rb] ^ _regs[rc];
+                            break;
+
+                        case XtdOpCode.Not:
+                            _regs[ra] = ~_regs[rb];
+                            break;
+
+                        case XtdOpCode.Neg:
+                            _regs[ra] = -_regs[rb];
                             break;
                     }
                     break;

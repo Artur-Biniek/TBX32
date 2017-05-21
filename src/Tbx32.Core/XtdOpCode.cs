@@ -9,5 +9,11 @@
         Mul,
         Div,
         Mod,
+        And,
+        Or,
+        Xor,
+
+        Not,
+        Neg
     }
 }

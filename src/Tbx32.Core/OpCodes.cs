@@ -24,7 +24,7 @@
         Bgt,            // Branch Greater
         Bge,            // Branch Greater or Equal
         Blt,            // Branch Less
-        Ble,            // Branch Less or Equal
+        Ble,            // Branch Less or Equal        
 
         Movi,
         Addi,         
@@ -32,6 +32,7 @@
         Shri,
         Muli,
         Divi,
+        Modi,
 
         Nop = 0b111110,
 

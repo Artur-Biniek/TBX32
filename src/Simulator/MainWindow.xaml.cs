@@ -31,29 +31,74 @@ namespace ArturBiniek.Tbx32.Simulator
             initializeScreen();
 
             Reset();
+
+            _dispatcherTimer.Interval = TimeSpan.FromMilliseconds(1); // TODO: this get's rounded to 30fps... need to fix it.
+            _dispatcherTimer.Tick += _dispatcherTimer_Tick;
+        }
+
+        private void _dispatcherTimer_Tick(object sender, EventArgs e)
+        {
+            SimStep();
         }
 
         private void Reset()
         {
+            _dispatcherTimer.IsEnabled = false;
+
             _comp = new Computer();
 
             var builder = new CodeBuilder();
 
             var video = builder.CreateLabel();
-            var loop = builder.CreateLabel();
+            var putPixel = builder.CreateLabel();
+            var whileLoop = builder.CreateLabel();
+            var exitLoop = builder.CreateLabel();
 
             var prg = builder
-                        .Ld(R.T0, video)
-                        .Movi(R.T1, 0b101010101)
-                        .MarkLabel(loop)
-                        .Str(R.T1, R.T0)
-                        .Addi(R.T0, R.T0, 1)
-                        .Jmp(loop)
+
+                        .Ld(R.G0, video)
+                        .Movi(R.S0, 0)
+                        .Movi(R.S1, 31)
+
+                        .MarkLabel(whileLoop)
+                            .Bgt(R.S0, R.S1, exitLoop)
+                            .Push(R.Fp)
+                            .Push(R.S0)
+                            .Push(R.S0)
+                            .Jal(R.Ra, putPixel)
+                            .Addi(R.S0, R.S0, 1)
+                            .Jmp(whileLoop)
+
+                        .MarkLabel(exitLoop)
+                            .Hlt()
+
+                        .MarkLabel(putPixel)
+                            // prolog
+                            .Mov(R.Fp, R.Sp)
+                            .Push(R.Ra)
+
+                            .Ldr(R.T0, R.Fp, 1)        // T0 <- x
+                            .Ldr(R.T1, R.Fp, 2)        // T1 <- y
+                            .Add(R.T2, R.G0, R.T0)     // T2 <- VIDEO + x
+                            .Movi(R.T3, 1)
+                            .Movi(R.T4, 31)
+                            .Sub(R.T4, R.T4, R.T1)
+                            .Shl(R.T4, R.T3, R.T4)
+                            .Ldr(R.T3, R.T2)
+                            .Or(R.T3, R.T3, R.T4)
+                            .Str(R.T3, R.T2)
+
+                            // epilog
+                            .Pop(R.Ra)
+                            .Addi(R.Sp, R.Sp, 2)
+                            .Pop(R.Fp)
+                            .Jmpr(R.Ra)
+
+
+
                         .MarkLabel(video)
                         .Data((int)Computer.VIDEO_START)
 
-                        .SetOrg(Computer.VIDEO_START)
-                        .Data(0x01, 0x02, 0x04, 0x08, 0x10)
                         .Build();
 
             _comp.LoadProgram(prg);
@@ -124,16 +169,30 @@ namespace ArturBiniek.Tbx32.Simulator
             }
         }
 
-        private void btnStep_Click(object sender, RoutedEventArgs e)
+        private void SimStep()
         {
             _comp.Step();
 
             screenRefresh();
         }
 
+        private void btnStep_Click(object sender, RoutedEventArgs e)
+        {
+            SimStep();
+        }
+
         private void btnReset_Click(object sender, RoutedEventArgs e)
         {
             Reset();
+        }
+
+        private void btnRun_Click(object sender, RoutedEventArgs e)
+        {
+            _comp.Run();
+            screenRefresh();
+
+            // TODO: Need to run simpulation on separate thread as simulating on dispatcher caps resolution to 30 updates per secon
+            //  _dispatcherTimer.IsEnabled = true;
         }
     }
 }

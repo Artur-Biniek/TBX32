@@ -36,9 +36,7 @@ namespace Tbx32.Core
 
             if (offset > short.MaxValue || -offset < short.MinValue)
             {
-                throw new InvalidOperationException("Offset out of 16bit signed value range");
-
-                // TODO: should we handle artificially injected "long" jumps?
+                throw new InvalidOperationException("Offset out of 16bit signed value range");              
             }
 
             short value = (short)(address > nextInstrAddress ? offset : -offset);
@@ -225,6 +223,11 @@ namespace Tbx32.Core
             return push(createOffsetType(OpCode.Divi, target, source, value));
         }
 
+        public CodeBuilder Modi(Register target, Register source, short value)
+        {
+            return push(createOffsetType(OpCode.Modi, target, source, value));
+        }
+
         public CodeBuilder Ld(Register target, Label source)
         {
             return pushDelayed(() => createAddressType(OpCode.Ld, target, source));
@@ -339,6 +342,32 @@ namespace Tbx32.Core
         public CodeBuilder Mod(Register target, Register leftSource, Register rightSource)
         {
             return push(createXtdType(XtdOpCode.Mod, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder And(Register target, Register leftSource, Register rightSource)
+        {
+            return push(createXtdType(XtdOpCode.And, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Or(Register target, Register leftSource, Register rightSource)
+        {
+            return push(createXtdType(XtdOpCode.Or, target, leftSource, rightSource));
+        }
+
+
+        public CodeBuilder Xor(Register target, Register leftSource, Register rightSource)
+        {
+            return push(createXtdType(XtdOpCode.Xor, target, leftSource, rightSource));
+        }
+
+        public CodeBuilder Not(Register target, Register source)
+        {
+            return push(createXtdType(XtdOpCode.Not, target, source, 0));
+        }
+
+        public CodeBuilder Neg(Register target, Register source)
+        {
+            return push(createXtdType(XtdOpCode.Neg, target, source, 0));
         }
 
         public CodeBuilder Nop()
