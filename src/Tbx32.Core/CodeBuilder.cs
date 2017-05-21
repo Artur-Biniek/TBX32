@@ -219,14 +219,24 @@ namespace Tbx32.Core
             return pushDelayed(() => createAddressType(OpCode.Jmp, (Register)0, target));
         }
 
-        public CodeBuilder Jr(Register target)
+        public CodeBuilder Jmpr(Register target)
         {
-            return push(createAddressType(OpCode.Jr, target, null));
+            return push(createAddressType(OpCode.Jmpr, target, null));
         }
 
         public CodeBuilder Jal(Register linkRegister, Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.Jal, linkRegister, target));
+        }
+
+        public CodeBuilder Brz(Register reg, Label target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.Brz, reg, target));
+        }
+
+        public CodeBuilder Brnz(Register reg, Label target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.Brnz, reg, target));
         }
 
         public CodeBuilder Add(Register target, Register leftSource, Register rightSource)

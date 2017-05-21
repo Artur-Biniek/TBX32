@@ -38,7 +38,7 @@ namespace Tests.Simulator
 
                 .Jal(R.Ra, addFunction) // call add function
 
-                .Mov(R.V1, R.V0) // stash sumation result into V1
+                .Mov(R.G0, R.V) // stash sumation result into G0
 
 
                 .Push(R.Fp)
@@ -61,13 +61,13 @@ namespace Tests.Simulator
                     // function code
                     .Ldr(R.T3, R.Fp, 1)
                     .Ldr(R.T4, R.Fp, 2)
-                    .Add(R.V0, R.T3, R.T4)
+                    .Add(R.V, R.T3, R.T4)
 
                     // epilog
                     .Pop(R.Ra)
                     .Addi(R.Sp, R.Sp, 2)
                     .Pop(R.Fp)
-                    .Jr(R.Ra)
+                    .Jmpr(R.Ra)
 
                 .MarkLabel(subFunction)
                     // prolog
@@ -77,13 +77,13 @@ namespace Tests.Simulator
                     // function code
                     .Ldr(R.T3, R.Fp, 1)
                     .Ldr(R.T4, R.Fp, 2)
-                    .Sub(R.V0, R.T3, R.T4)
+                    .Sub(R.V, R.T3, R.T4)
 
                     // epilog
                     .Pop(R.Ra)
                     .Addi(R.Sp, R.Sp, 2)
                     .Pop(R.Fp)
-                    .Jr(R.Ra);
+                    .Jmpr(R.Ra);
 
             comp.LoadProgram(prg.Build());
 
@@ -91,8 +91,8 @@ namespace Tests.Simulator
 
             Assert.That(comp[R.Sp] == Computer.STACK_BOTTOM);
             Assert.That(comp[R.Fp] == 0x23);
-            Assert.That(comp[R.V1] == a + b);
-            Assert.That(comp[R.V0] == a - b);
+            Assert.That(comp[R.G0] == a + b);
+            Assert.That(comp[R.V] == a - b);
         }
     }
 }

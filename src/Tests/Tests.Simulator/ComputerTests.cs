@@ -407,7 +407,7 @@ namespace Tests.Simulator
         }
 
         [Test]
-        public void JrInstructionShouldWork()
+        public void JmprInstructionShouldWork()
         {
             var prg = new CodeBuilder();
             var comp = new Computer();
@@ -415,7 +415,7 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg.Movi(Register.R19, 0x100)
-               .Jr(Register.R19)
+               .Jmpr(Register.R19)
                .Movi(Register.R20, 11)
                .SetOrg(0x100)
                .MarkLabel(target1)
@@ -472,7 +472,7 @@ namespace Tests.Simulator
                .SetOrg(0x100)
                .MarkLabel(target1)
                .Movi(Register.R21, 21)
-               .Jr(R.Ra)
+               .Jmpr(R.Ra)
                .MarkLabel(target2);
 
             comp.LoadProgram(prg.Build());
@@ -854,6 +854,94 @@ namespace Tests.Simulator
         public void HltIsEncodedAsZero()
         {
             Assert.That((uint)OpCode.Hlt == 0);
+        }
+
+        [Test]
+        public void BrzDoesNotJumpWhenRegisterIsNotZero()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movi(R.G0, 1)
+                .Movi(R.G1, 55)
+                .Brz(R.G0, target1)
+                .Movi(R.G1, 88)
+                .MarkLabel(target1)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G1] == 88);
+        }
+
+        [Test]
+        public void BrzJumpsWhenRegisterIsZero()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movi(R.G0, 0)
+                .Movi(R.G1, 55)
+                .Brz(R.G0, target1)
+                .Movi(R.G1, 88)
+                .MarkLabel(target1)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G1] == 55);
+        }
+
+        [Test]
+        public void BrnzDoesNotJumpWhenRegisterIsZero()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movi(R.G0, 0)
+                .Movi(R.G1, 55)
+                .Brnz(R.G0, target1)
+                .Movi(R.G1, 88)
+                .MarkLabel(target1)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G1] == 88);
+        }
+
+        [Test]
+        public void BrnzJumpsWhenRegisterIsNonZero()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movi(R.G0, 1)
+                .Movi(R.G1, 55)
+                .Brnz(R.G0, target1)
+                .Movi(R.G1, 88)
+                .MarkLabel(target1)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G1] == 55);
         }
     }
 }

@@ -2,6 +2,7 @@
 {
     public static class R
     {
+        // temporary values registers - functions can overwrite values
         public const Register T0 = Register.R0;
         public const Register T1 = Register.R1;
         public const Register T2 = Register.R2;
@@ -11,16 +12,37 @@
         public const Register T6 = Register.R6;
         public const Register T7 = Register.R7;
 
-        public const Register V0 = Register.R8;
-        public const Register V1 = Register.R9;
+        // holds function's result if it returns one value
+        public const Register V = Register.R8;
 
+        // saved registers - must be preserved between function calls
+        public const Register S0 = Register.R9;
+        public const Register S1 = Register.R10;
+        public const Register S2 = Register.R11;
+        public const Register S3 = Register.R12;
+
+        // global registers - must be preserved between function calls
+        public const Register G0 = Register.R13;
+        public const Register G1 = Register.R14;
+        public const Register G2 = Register.R15;
+        public const Register G3 = Register.R16;
+        public const Register G4 = Register.R17;
+        public const Register G5 = Register.R18;
+        public const Register G6 = Register.R19;
+        public const Register G7 = Register.R20;        
 
         //...
 
-
+        // assembler reserved register
         public const Register AsmRes = Register.R28;
+
+        // frame pointer register
         public const Register Fp = Register.R29;
+
+        // stack pointer register
         public const Register Sp = Register.R30;
+
+        // return address - convention to store return address with jump-and-link / jump-register
         public const Register Ra = Register.R31;
     }
 }

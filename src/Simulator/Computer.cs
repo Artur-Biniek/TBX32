@@ -57,7 +57,7 @@ namespace ArturBiniek.Tbx32.Simulator
         }
 
         public void Reset()
-        {            
+        {
             _PC = 0u;
             _ram.Reset();
             _regs.Reset();
@@ -79,7 +79,7 @@ namespace ArturBiniek.Tbx32.Simulator
             {
                 Step();
             }
-            while (_IR != (uint)OpCode.Hlt);          
+            while (_IR != (uint)OpCode.Hlt);
         }
 
         public void Step()
@@ -116,13 +116,27 @@ namespace ArturBiniek.Tbx32.Simulator
                     _PC = address;
                     break;
 
-                case OpCode.Jr:
+                case OpCode.Jmpr:
                     _PC = (uint)_regs[ra];
                     break;
 
                 case OpCode.Jal:
                     _regs[ra] = (int)_PC;
                     _PC = address;
+                    break;
+
+                case OpCode.Brz:
+                    if (_regs[ra] == 0)
+                    {
+                        _PC = address;
+                    }
+                    break;
+
+                case OpCode.Brnz:
+                    if (_regs[ra] != 0)
+                    {
+                        _PC = address;
+                    }
                     break;
 
                 case OpCode.Addi:
