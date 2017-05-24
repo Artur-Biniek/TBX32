@@ -23,7 +23,8 @@ namespace ArturBiniek.Tbx32.Simulator
 
         Rectangle[,] _pixels = new Rectangle[32, 32];
 
-        Computer _comp = new Computer();
+        Computer _comp;
+        private DateTime LastTime;
 
         public MainWindow()
         {
@@ -143,8 +144,6 @@ namespace ArturBiniek.Tbx32.Simulator
                     _pixels[i, j] = rect;
                 }
             }
-
-            screenRefresh();
         }
 
         private void screenRefresh()
@@ -178,7 +177,11 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private void _dispatcherTimer_Tick(object sender, EventArgs e)
         {
-            for (int i = 0; i < 33; i++)
+            var dif = DateTime.Now - LastTime;
+
+            LastTime = DateTime.Now;            
+
+            for (int i = 0; i <  dif.TotalMilliseconds; i++)
                 _comp.Step();
 
             screenRefresh();
@@ -196,6 +199,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private void btnRun_Click(object sender, RoutedEventArgs e)
         {
+            LastTime = DateTime.Now;
             _dispatcherTimer.IsEnabled = true;
         }
     }

@@ -8,6 +8,8 @@
         Ld,             // Load
         St,             // Store
 
+        Rnd,            // Random value
+
         Jmp,            // Jump (unconditionaly)
         Jmpr,           // Jump Register (unconditionally)
         Jal,            // Jump And Link (unconditinoally)

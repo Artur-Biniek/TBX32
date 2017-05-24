@@ -243,6 +243,11 @@ namespace Tbx32.Core
             return pushDelayed(() => createAddressType(OpCode.St, source, target));
         }
 
+        public CodeBuilder Rnd(Register target)
+        {
+            return push(createAddressType(OpCode.Rnd, target, null));
+        }
+
         public CodeBuilder Str(Register source, Register target, short offset = 0)
         {
             return push(createOffsetType(OpCode.Str, source, target, offset));

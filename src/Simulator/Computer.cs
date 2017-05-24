@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Tbx32.Core;
 
 namespace ArturBiniek.Tbx32.Simulator
@@ -21,8 +22,10 @@ namespace ArturBiniek.Tbx32.Simulator
 
         uint _PC;
         uint _IR;
+      
         Memory _ram = new Memory();
         Registers _regs = new Registers();
+        Random _rnd = new Random();
 
         public uint PC
         {
@@ -74,17 +77,15 @@ namespace ArturBiniek.Tbx32.Simulator
 
         public void Run()
         {
-            do
-            {
-                Step();
-            }
-            while (_IR != (uint)OpCode.Hlt);
+            while (Step()) ;
         }
 
-        public void Step()
+        public bool Step()
         {
             _IR = (uint)_ram[_PC];
             _PC++;
+
+            var ticks = (ulong)_ram[TICKS_LOW] + (ulong)_ram[TICKS_HIGH] << 32;
 
             var opcode = CodeBuilder.ExtractOpCode(_IR);
             var ra = CodeBuilder.ExtractRegA(_IR);
@@ -105,6 +106,10 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 case OpCode.St:
                     _ram[address] = _regs[ra];
+                    break;
+
+                case OpCode.Rnd:
+                    _regs[ra] = _rnd.Next(int.MinValue, int.MaxValue);
                     break;
 
                 case OpCode.Str:
@@ -213,7 +218,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 case OpCode.Hlt:
                     _PC--;
-                    break;
+                    return false;
 
                 case OpCode.Xtd:
                     XtdOpCode fun = CodeBuilder.ExtractXtdOpCode(_IR);
@@ -269,6 +274,13 @@ namespace ArturBiniek.Tbx32.Simulator
                     }
                     break;
             }
+
+            ticks++;
+
+            _ram[TICKS_LOW] = (int)(0x00000000FFFFFFFF & ticks);
+            _ram[TICKS_HIGH] = (int)((0xFFFFFFFF00000000 & ticks) >> 32);
+
+            return true;
         }
     }
 }
