@@ -42,7 +42,7 @@ namespace ArturBiniek.Tbx32.Simulator
         {
             _dispatcherTimer.IsEnabled = false;
 
-            var prg = createDiagonalLineProgram();
+            var prg = createClockDependendDiagonalLineProgram();
 
             _comp = new Computer();
             _comp.LoadProgram(prg);
@@ -101,6 +101,73 @@ namespace ArturBiniek.Tbx32.Simulator
 
                         .MarkLabel(video)
                             .Data((int)Computer.VIDEO_START)
+
+                        .Build();
+
+            return prg;
+        }
+
+        private IReadOnlyDictionary<uint, uint> createClockDependendDiagonalLineProgram()
+        {
+            var builder = new CodeBuilder();
+
+            var video = builder.CreateLabel();
+            var lowClock = builder.CreateLabel();
+            var putPixel = builder.CreateLabel();
+            var whileLoop = builder.CreateLabel();
+            var exitLoop = builder.CreateLabel();
+
+            var prg = builder
+
+                        .Ld(R.G0, video)
+                        .Ld(R.G1, lowClock)
+                        .Movi(R.S0, 0)
+                        .Movi(R.S1, 31)
+                        .Ldr(R.S2, R.G1)           // S2 <- old time
+
+                        .MarkLabel(whileLoop)
+                            .Bgt(R.S0, R.S1, exitLoop)
+                            .Ldr(R.T0, R.G1)        // T0 <- current time
+                            .Sub(R.T0, R.T0, R.S2)  // T0 <- old time - current time
+                            .Movi(R.T1, 2000)
+                            .Blt(R.T0 ,R.T1, whileLoop) // jump back to the begining if less than 1000s
+                            .Ldr(R.S2, R.G1)            
+                            .Push(R.Fp)
+                            .Push(R.S0)
+                            .Push(R.S0)
+                            .Jal(R.Ra, putPixel)
+                            .Addi(R.S0, R.S0, 1)
+                            .Jmp(whileLoop)
+
+                        .MarkLabel(exitLoop)
+                            .Hlt()
+
+                        .MarkLabel(putPixel)
+                            // prolog
+                            .Mov(R.Fp, R.Sp)
+                            .Push(R.Ra)
+
+                            .Ldr(R.T0, R.Fp, 1)        // T0 <- x
+                            .Ldr(R.T1, R.Fp, 2)        // T1 <- y
+                            .Add(R.T2, R.G0, R.T0)     // T2 <- VIDEO + x
+                            .Movi(R.T3, 1)
+                            .Movi(R.T4, 31)
+                            .Sub(R.T4, R.T4, R.T1)
+                            .Shl(R.T4, R.T3, R.T4)
+                            .Ldr(R.T3, R.T2)
+                            .Or(R.T3, R.T3, R.T4)
+                            .Str(R.T3, R.T2)
+
+                            // epilog
+                            .Pop(R.Ra)
+                            .Addi(R.Sp, R.Sp, 2)
+                            .Pop(R.Fp)
+                            .Jmpr(R.Ra)
+
+                        .MarkLabel(video)
+                            .Data((int)Computer.VIDEO_START)
+                        .MarkLabel(lowClock)
+                            .Data((int)Computer.TICKS_LOW)
 
                         .Build();
 

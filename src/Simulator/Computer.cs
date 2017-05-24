@@ -85,7 +85,7 @@ namespace ArturBiniek.Tbx32.Simulator
             _IR = (uint)_ram[_PC];
             _PC++;
 
-            var ticks = (ulong)_ram[TICKS_LOW] + (ulong)_ram[TICKS_HIGH] << 32;
+            var ticks = (ulong)_ram[TICKS_LOW] + ((ulong)_ram[TICKS_HIGH] << 32);
 
             var opcode = CodeBuilder.ExtractOpCode(_IR);
             var ra = CodeBuilder.ExtractRegA(_IR);
