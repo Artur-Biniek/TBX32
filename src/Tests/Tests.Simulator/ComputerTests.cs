@@ -167,7 +167,7 @@ namespace Tests.Simulator
             var comp = new Computer();
 
             var prg = new CodeBuilder()
-                    .Movi(Register.R30, 0)
+                    .Movli(Register.R30, 0)
                     .Addi(Register.R31, Register.R30, -10)
                     .Addi(Register.R29, Register.R31, 20)
                     .Build();
@@ -185,14 +185,14 @@ namespace Tests.Simulator
         }
 
         [Test]
-        public void MovImmediateInstructionShouldWork()
+        public void MovLowImmediateInstructionShouldWork()
         {
             var prg = new CodeBuilder();
             var comp = new Computer();
 
             for (int i = 0; i < 32; i++)
             {
-                prg.Movi((Register)i, (short)((i + 1) * 2));
+                prg.Movli((Register)i, (short)((i + 1) * 2));
             }
 
             comp.LoadProgram(prg.Build());
@@ -206,13 +206,34 @@ namespace Tests.Simulator
         }
 
         [Test]
+        public void MovHighImmediateInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            for (int i = 0; i < 32; i++)
+            {
+                prg.Movhi((Register)i, (short)((i + 1) * 2));
+            }
+
+            comp.LoadProgram(prg.Build());
+
+            for (int i = 0; i < 32; i++)
+            {
+                comp.Step();
+
+                Assert.That(comp[(Register)i], Is.EqualTo(((i + 1) * 2) << 16));
+            }
+        }
+
+        [Test]
         public void ShlImmediateInstructionShouldWork()
         {
             var prg = new CodeBuilder();
             var comp = new Computer();
             var expected = 1;
 
-            prg.Movi(Register.R0, (short)expected);
+            prg.Movli(Register.R0, (short)expected);
             for (int i = 0; i < 32; i++)
             {
                 prg.Shli(Register.R31, Register.R0, (short)i);
@@ -239,7 +260,7 @@ namespace Tests.Simulator
             var start = 1 << 31;
             var expected = 0;
 
-            prg.Movi(0, 1);
+            prg.Movli(0, 1);
             prg.Shli(Register.R0, Register.R0, 31);
 
             for (int i = 0; i < 31; i++)
@@ -267,7 +288,7 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R10, 13);
+            prg.Movli(Register.R10, 13);
             prg.Divi(Register.R11, Register.R10, 3);
 
             comp.LoadProgram(prg.Build());
@@ -289,7 +310,7 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R10, a);
+            prg.Movli(Register.R10, a);
             prg.Modi(Register.R11, Register.R10, b);
 
             comp.LoadProgram(prg.Build());
@@ -309,7 +330,7 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R10, a);
+            prg.Movli(Register.R10, a);
             prg.Muli(Register.R11, Register.R10, b);
 
             comp.LoadProgram(prg.Build());
@@ -361,7 +382,7 @@ namespace Tests.Simulator
             prg.CreateLabel(0x100 + 1);
 
             prg
-                .Movi(R.T1, 0x100)
+                .Movli(R.T1, 0x100)
                 .Ldr(R.T4, R.T1, -1)
                 .Ldr(R.T5, R.T1, +1)
                 .Hlt()
@@ -389,7 +410,7 @@ namespace Tests.Simulator
 
             var variable = prg.CreateLabel();
 
-            prg.Movi(Register.R17, value)
+            prg.Movli(Register.R17, value)
                .St(Register.R17, variable)
                .SetOrg(addr)
                .MarkLabel(variable);
@@ -410,15 +431,15 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
             var target2 = prg.CreateLabel();
 
-            prg.Movi(Register.R19, 20)
+            prg.Movli(Register.R19, 20)
                .Jmp(target1)
-               .Movi(Register.R20, 11)
+               .Movli(Register.R20, 11)
                .MarkLabel(target1)
-               .Movi(Register.R20, 21)
+               .Movli(Register.R20, 21)
                .Jmp(target2)
-               .Movi(Register.R21, 12)
+               .Movli(Register.R21, 12)
                .MarkLabel(target2)
-               .Movi(Register.R21, 22);
+               .Movli(Register.R21, 22);
 
             comp.LoadProgram(prg.Build());
             comp.Run();
@@ -436,12 +457,12 @@ namespace Tests.Simulator
 
             var target1 = prg.CreateLabel();
 
-            prg.Movi(Register.R19, 0x100)
+            prg.Movli(Register.R19, 0x100)
                .Jmpr(Register.R19)
-               .Movi(Register.R20, 11)
+               .Movli(Register.R20, 11)
                .SetOrg(0x100)
                .MarkLabel(target1)
-               .Movi(Register.R21, 21);
+               .Movli(Register.R21, 21);
 
             comp.LoadProgram(prg.Build());
             comp.Run();
@@ -458,12 +479,12 @@ namespace Tests.Simulator
 
             var target1 = prg.CreateLabel();
 
-            prg.Movi(Register.R19, 11)
+            prg.Movli(Register.R19, 11)
                .Jal(Register.R19, target1)
-               .Movi(Register.R20, 11)
+               .Movli(Register.R20, 11)
                .SetOrg(0x100)
                .MarkLabel(target1)
-               .Movi(Register.R21, 21);
+               .Movli(Register.R21, 21);
 
             comp.LoadProgram(prg.Build());
 
@@ -487,13 +508,13 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
             var target2 = prg.CreateLabel();
 
-            prg.Movi(Register.R19, 11)
+            prg.Movli(Register.R19, 11)
                .Jal(R.Ra, target1)
-               .Movi(Register.R20, 12)
+               .Movli(Register.R20, 12)
                .Jmp(target2)
                .SetOrg(0x100)
                .MarkLabel(target1)
-               .Movi(Register.R21, 21)
+               .Movli(Register.R21, 21)
                .Jmpr(R.Ra)
                .MarkLabel(target2);
 
@@ -511,7 +532,7 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R0, 1234)
+            prg.Movli(Register.R0, 1234)
                .Mov(Register.R1, Register.R0)
                .Mov(Register.R2, Register.R1)
                .Mov(Register.R3, Register.R2);
@@ -531,8 +552,8 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R0, 1234)
-               .Movi(Register.R1, 0x1111)
+            prg.Movli(Register.R0, 1234)
+               .Movli(Register.R1, 0x1111)
                .Str(Register.R0, Register.R1);
 
             comp.LoadProgram(prg.Build());
@@ -547,8 +568,8 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R0, 666)
-               .Movi(Register.R1, 0x1111)
+            prg.Movli(Register.R0, 666)
+               .Movli(Register.R1, 0x1111)
                .Addi(Register.R0, Register.R0, -1)
                .Str(Register.R0, Register.R1, -1)
                .Addi(Register.R0, Register.R0, 2)
@@ -572,8 +593,8 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R20, a)
-               .Movi(Register.R21, b)
+            prg.Movli(Register.R20, a)
+               .Movli(Register.R21, b)
                .Add(Register.R22, Register.R20, Register.R21)
                .Add(Register.R23, Register.R21, Register.R20);
 
@@ -594,8 +615,8 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R20, a)
-               .Movi(Register.R21, b)
+            prg.Movli(Register.R20, a)
+               .Movli(Register.R21, b)
                .Sub(Register.R22, Register.R20, Register.R21)
                .Sub(Register.R23, Register.R21, Register.R20);
 
@@ -629,7 +650,7 @@ namespace Tests.Simulator
                    .Data(a)
                    .MarkLabel(skip)
                    .Ld(Register.R15, val)
-                   .Movi(Register.R16, (short)i)
+                   .Movli(Register.R16, (short)i)
                    .Shl(Register.R17, Register.R15, Register.R16);
 
                 comp.LoadProgram(prg.Build());
@@ -662,7 +683,7 @@ namespace Tests.Simulator
                    .Data(a)
                    .MarkLabel(skip)
                    .Ld(Register.R15, val)
-                   .Movi(Register.R16, (short)i)
+                   .Movli(Register.R16, (short)i)
                    .Shr(Register.R17, Register.R15, Register.R16);
 
                 comp.LoadProgram(prg.Build());
@@ -834,9 +855,9 @@ namespace Tests.Simulator
             }
 
             prg.Hlt()
-                .Movi(Register.R0, 1)
-                .Movi(Register.R1, 2)
-                .Movi(Register.R2, 3);
+                .Movli(Register.R0, 1)
+                .Movli(Register.R1, 2)
+                .Movli(Register.R2, 3);
 
             comp.LoadProgram(prg.Build());
 
@@ -887,10 +908,10 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg
-                .Movi(R.G0, 1)
-                .Movi(R.G1, 55)
+                .Movli(R.G0, 1)
+                .Movli(R.G1, 55)
                 .Brz(R.G0, target1)
-                .Movi(R.G1, 88)
+                .Movli(R.G1, 88)
                 .MarkLabel(target1)
                 .Hlt();
 
@@ -909,10 +930,10 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg
-                .Movi(R.G0, 0)
-                .Movi(R.G1, 55)
+                .Movli(R.G0, 0)
+                .Movli(R.G1, 55)
                 .Brz(R.G0, target1)
-                .Movi(R.G1, 88)
+                .Movli(R.G1, 88)
                 .MarkLabel(target1)
                 .Hlt();
 
@@ -931,10 +952,10 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg
-                .Movi(R.G0, 0)
-                .Movi(R.G1, 55)
+                .Movli(R.G0, 0)
+                .Movli(R.G1, 55)
                 .Brnz(R.G0, target1)
-                .Movi(R.G1, 88)
+                .Movli(R.G1, 88)
                 .MarkLabel(target1)
                 .Hlt();
 
@@ -953,10 +974,10 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg
-                .Movi(R.G0, 1)
-                .Movi(R.G1, 55)
+                .Movli(R.G0, 1)
+                .Movli(R.G1, 55)
                 .Brnz(R.G0, target1)
-                .Movi(R.G1, 88)
+                .Movli(R.G1, 88)
                 .MarkLabel(target1)
                 .Hlt();
 
@@ -975,12 +996,12 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg
-                .Movi(R.T0, 1)
-                .Movi(R.T1, 1)
+                .Movli(R.T0, 1)
+                .Movli(R.T1, 1)
                 .Beq(R.T0, R.T1, target1)
                 .Hlt()
                 .MarkLabel(target1)
-                .Movi(R.G0, 432)
+                .Movli(R.G0, 432)
                 .Hlt();
 
             comp.LoadProgram(prg.Build());
@@ -1001,11 +1022,11 @@ namespace Tests.Simulator
             prg
                 .Jmp(actualStart)
                 .MarkLabel(target1)
-                .Movi(R.G0, -765)
+                .Movli(R.G0, -765)
                 .Hlt()
                 .MarkLabel(actualStart)
-                .Movi(R.T0, 1)
-                .Movi(R.T1, 1)
+                .Movli(R.T0, 1)
+                .Movli(R.T1, 1)
                 .Beq(R.T0, R.T1, target1)
                 .Hlt();
 
@@ -1024,12 +1045,12 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg
-                .Movi(R.T0, 1)
-                .Movi(R.T1, 0)
+                .Movli(R.T0, 1)
+                .Movli(R.T1, 0)
                 .Bneq(R.T0, R.T1, target1)
                 .Hlt()
                 .MarkLabel(target1)
-                .Movi(R.G0, 1432)
+                .Movli(R.G0, 1432)
                 .Hlt();
 
             comp.LoadProgram(prg.Build());
@@ -1047,13 +1068,13 @@ namespace Tests.Simulator
             var target1 = prg.CreateLabel();
 
             prg
-                .Movi(R.T0, 12)
-                .Movi(R.T1, 12)
+                .Movli(R.T0, 12)
+                .Movli(R.T1, 12)
                 .Bneq(R.T0, R.T1, target1)
-                .Movi(R.G0, 1432)
+                .Movli(R.G0, 1432)
                 .Hlt()
                 .MarkLabel(target1)
-                .Movi(R.G0, 5674)
+                .Movli(R.G0, 5674)
                 .Hlt();
 
             comp.LoadProgram(prg.Build());
@@ -1084,13 +1105,13 @@ namespace Tests.Simulator
             var jumpLabel = prg.CreateLabel();
 
             prg
-                .Movi(R.T0, left)
-                .Movi(R.T1, right)
+                .Movli(R.T0, left)
+                .Movli(R.T1, right)
                 .Bge(R.T0, R.T1, jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Movli(R.G0, VALUE_WHEN_NO_JUMP)
                 .Hlt()
                 .MarkLabel(jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Movli(R.G0, VALUE_WHEN_JUMMPED)
                 .Hlt();
 
             comp.LoadProgram(prg.Build());
@@ -1121,13 +1142,13 @@ namespace Tests.Simulator
             var jumpLabel = prg.CreateLabel();
 
             prg
-                .Movi(R.T0, left)
-                .Movi(R.T1, right)
+                .Movli(R.T0, left)
+                .Movli(R.T1, right)
                 .Ble(R.T0, R.T1, jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Movli(R.G0, VALUE_WHEN_NO_JUMP)
                 .Hlt()
                 .MarkLabel(jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Movli(R.G0, VALUE_WHEN_JUMMPED)
                 .Hlt();
 
             comp.LoadProgram(prg.Build());
@@ -1158,13 +1179,13 @@ namespace Tests.Simulator
             var jumpLabel = prg.CreateLabel();
 
             prg
-                .Movi(R.T0, left)
-                .Movi(R.T1, right)
+                .Movli(R.T0, left)
+                .Movli(R.T1, right)
                 .Bgt(R.T0, R.T1, jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Movli(R.G0, VALUE_WHEN_NO_JUMP)
                 .Hlt()
                 .MarkLabel(jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Movli(R.G0, VALUE_WHEN_JUMMPED)
                 .Hlt();
 
             comp.LoadProgram(prg.Build());
@@ -1195,13 +1216,13 @@ namespace Tests.Simulator
             var jumpLabel = prg.CreateLabel();
 
             prg
-                .Movi(R.T0, left)
-                .Movi(R.T1, right)
+                .Movli(R.T0, left)
+                .Movli(R.T1, right)
                 .Blt(R.T0, R.T1, jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_NO_JUMP)
+                .Movli(R.G0, VALUE_WHEN_NO_JUMP)
                 .Hlt()
                 .MarkLabel(jumpLabel)
-                .Movi(R.G0, VALUE_WHEN_JUMMPED)
+                .Movli(R.G0, VALUE_WHEN_JUMMPED)
                 .Hlt();
 
             comp.LoadProgram(prg.Build());
@@ -1221,7 +1242,7 @@ namespace Tests.Simulator
                 var jumpLabel = prg.CreateLabel();
 
                 prg
-                    .Movi(R.T0, i)
+                    .Movli(R.T0, i)
                     .Neg(R.T1, R.T0)
                     .Hlt();
 
@@ -1243,7 +1264,7 @@ namespace Tests.Simulator
                 var jumpLabel = prg.CreateLabel();
 
                 prg
-                    .Movi(R.T0, i)
+                    .Movli(R.T0, i)
                     .Not(R.T1, R.T0)
                     .Hlt();
 
@@ -1267,8 +1288,8 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R20, a)
-               .Movi(Register.R21, b)
+            prg.Movli(Register.R20, a)
+               .Movli(Register.R21, b)
                .And(Register.R22, Register.R20, Register.R21);
 
             comp.LoadProgram(prg.Build());
@@ -1290,8 +1311,8 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R20, a)
-               .Movi(Register.R21, b)
+            prg.Movli(Register.R20, a)
+               .Movli(Register.R21, b)
                .Or(Register.R22, Register.R20, Register.R21);
 
             comp.LoadProgram(prg.Build());
@@ -1313,14 +1334,102 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R20, a)
-               .Movi(Register.R21, b)
+            prg.Movli(Register.R20, a)
+               .Movli(Register.R21, b)
                .Xor(Register.R22, Register.R20, Register.R21);
 
             comp.LoadProgram(prg.Build());
             comp.Run();
 
             Assert.That(comp[Register.R22], Is.EqualTo(a ^ b));
+        }
+
+        [Test]
+        [TestCase(345)]
+        [TestCase(-34)]
+        [TestCase(-3)]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(-1)]
+        public void AndImmediateShouldWork(short a)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movli(Register.R20, 0b10101010)
+               .Andi(Register.R21, Register.R20, a);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R21], Is.EqualTo(0b10101010 & a));
+        }
+
+        [Test]
+        [TestCase(345)]
+        [TestCase(-34)]
+        [TestCase(-3)]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(-1)]
+        public void OrImmediateShouldWork(short a)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movli(Register.R20, 0b10101010)
+               .Ori(Register.R21, Register.R20, a);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R21], Is.EqualTo(0b10101010 | (ushort)a));
+        }
+
+        [Test]
+        [TestCase(345)]
+        [TestCase(-34)]
+        [TestCase(-3)]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(-1)]
+        public void XorImmediateShouldWork(short a)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movli(Register.R20, 0b10101010)
+               .Xori(Register.R21, Register.R20, a);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R21], Is.EqualTo(0b10101010 ^ a));
+        }
+
+        [Test]
+        [TestCase(345)]
+        [TestCase(-34)]
+        [TestCase(-3)]
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(-1)]
+        [TestCase(0x0BCD0123)]
+        [TestCase(0x0001FFFF)]
+        [TestCase(0x000F0000)]
+        [TestCase(0x0A0B0C0D)]
+        [TestCase(0x00008000)]
+        public void MoviPseudoInstructionShouldWork(int a)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            prg.Movi(Register.R20, a);
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[Register.R20], Is.EqualTo(a));
         }
     }
 }

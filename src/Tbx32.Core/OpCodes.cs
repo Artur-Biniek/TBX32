@@ -28,13 +28,17 @@
         Blt,            // Branch Less
         Ble,            // Branch Less or Equal        
 
-        Movi,
+        Movli,
+        Movhi,
         Addi,         
         Shli,
         Shri,
         Muli,
         Divi,
         Modi,
+        Andi,
+        Ori,
+        Xori,
 
         Nop = 0b111110,
 

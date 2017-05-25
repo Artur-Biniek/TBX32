@@ -87,7 +87,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
             var ticks = (ulong)_ram[TICKS_LOW] + ((ulong)_ram[TICKS_HIGH] << 32);
 
-            var opcode = CodeBuilder.ExtractOpCode(_IR);
+            var opcode = (OpCode)CodeBuilder.ExtractOpCode(_IR);
             var ra = CodeBuilder.ExtractRegA(_IR);
             var rb = CodeBuilder.ExtractRegB(_IR);
             var rc = CodeBuilder.ExtractRegC(_IR);
@@ -189,8 +189,12 @@ namespace ArturBiniek.Tbx32.Simulator
                     _regs[ra] = _regs[rb] + offset;
                     break;
 
-                case OpCode.Movi:
+                case OpCode.Movli:
                     _regs[ra] = offset;
+                    break;
+
+                case OpCode.Movhi:
+                    _regs[ra] = offset << 16;
                     break;
 
                 case OpCode.Shli:
@@ -211,6 +215,18 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 case OpCode.Modi:
                     _regs[ra] = _regs[rb] % offset;
+                    break;
+
+                case OpCode.Andi:
+                    _regs[ra] = _regs[rb] & offset;
+                    break;
+
+                case OpCode.Ori:
+                    _regs[ra] = _regs[rb] | (ushort)offset;
+                    break;
+
+                case OpCode.Xori:
+                    _regs[ra] = _regs[rb] ^ offset;
                     break;
 
                 case OpCode.Nop:

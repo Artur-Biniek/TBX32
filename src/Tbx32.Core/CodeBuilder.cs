@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Tbx32.Core
 {
@@ -36,7 +37,7 @@ namespace Tbx32.Core
 
             if (offset > short.MaxValue || -offset < short.MinValue)
             {
-                throw new InvalidOperationException("Offset out of 16bit signed value range");              
+                throw new InvalidOperationException("Offset out of 16bit signed value range");
             }
 
             short value = (short)(address > nextInstrAddress ? offset : -offset);
@@ -165,6 +166,11 @@ namespace Tbx32.Core
             return this;
         }
 
+        public CodeBuilder Data(params uint[] datapoints)
+        {
+            return Data(datapoints.Select(p => (int)p).ToArray());
+        }
+
         public CodeBuilder SetOrg(uint address)
         {
             _index = address;
@@ -198,9 +204,14 @@ namespace Tbx32.Core
             return push(createOffsetType(OpCode.Addi, target, source, value));
         }
 
-        public CodeBuilder Movi(Register target, short value)
+        public CodeBuilder Movli(Register target, short value)
         {
-            return push(createOffsetType(OpCode.Movi, target, Register.R0, value));
+            return push(createOffsetType(OpCode.Movli, target, Register.R0, value));
+        }
+
+        public CodeBuilder Movhi(Register target, short value)
+        {
+            return push(createOffsetType(OpCode.Movhi, target, Register.R0, value));
         }
 
         public CodeBuilder Shli(Register target, Register source, short value)
@@ -226,6 +237,21 @@ namespace Tbx32.Core
         public CodeBuilder Modi(Register target, Register source, short value)
         {
             return push(createOffsetType(OpCode.Modi, target, source, value));
+        }
+
+        public CodeBuilder Andi(Register target, Register source, short value)
+        {
+            return push(createOffsetType(OpCode.Andi, target, source, value));
+        }
+
+        public CodeBuilder Ori(Register target, Register source, short value)
+        {
+            return push(createOffsetType(OpCode.Ori, target, source, value));
+        }
+
+        public CodeBuilder Xori(Register target, Register source, short value)
+        {
+            return push(createOffsetType(OpCode.Xori, target, source, value));
         }
 
         public CodeBuilder Ld(Register target, Label source)

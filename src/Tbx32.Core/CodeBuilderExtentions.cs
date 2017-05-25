@@ -16,5 +16,22 @@
         {
             return builder.Addi(R.Sp, R.Sp, +1).Ldr(reg, R.Sp);
         }
+
+        public static CodeBuilder Inc(this CodeBuilder builder, Register reg)
+        {
+            return builder.Addi(reg, reg, +1);
+        }
+
+        public static CodeBuilder Dec(this CodeBuilder builder, Register reg)
+        {
+            return builder.Addi(reg, reg, -1);
+        }
+
+        public static CodeBuilder Movi(this CodeBuilder builder, Register reg, int value)
+        {
+            return builder
+                    .Movhi(reg, (short)((value & 0xFFFF0000) >> 16))
+                    .Ori(reg, reg, (short)(value & 0x0000FFFF));
+        }
     }
 }

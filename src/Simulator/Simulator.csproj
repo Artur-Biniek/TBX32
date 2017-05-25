@@ -55,6 +55,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Memory.cs" />
+    <Compile Include="ProgramsRepository.cs" />
     <Compile Include="Registers.cs" />
     <Compile Include="Computer.cs" />
     <Page Include="MainWindow.xaml">

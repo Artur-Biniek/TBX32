@@ -24,14 +24,14 @@ namespace Tests.Simulator
             var subFunction = builder.CreateLabel();
 
             var prg = builder
-                .Movi(R.Fp, 0x23) // simpulate some inital FP value
+                .Movli(R.Fp, 0x23) // simpulate some inital FP value
 
                 // program start
 
                 .Push(R.Fp)
 
-                .Movi(R.T0, a)
-                .Movi(R.T1, b)
+                .Movli(R.T0, a)
+                .Movli(R.T1, b)
 
                 .Push(R.T1)
                 .Push(R.T0)
@@ -43,8 +43,8 @@ namespace Tests.Simulator
 
                 .Push(R.Fp)
 
-                .Movi(R.T0, a)
-                .Movi(R.T1, b)
+                .Movli(R.T0, a)
+                .Movli(R.T1, b)
 
                 .Push(R.T1)
                 .Push(R.T0)
