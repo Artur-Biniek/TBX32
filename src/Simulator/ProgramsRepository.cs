@@ -54,15 +54,14 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Push(R.Ra)
 
                             .Ldr(R.T0, R.Fp, 1)        // T0 <- x
-                            .Ldr(R.T1, R.Fp, 2)        // T1 <- y
-                            .Add(R.T2, R.G0, R.T0)     // T2 <- VIDEO + x
+                            .Ldr(R.T1, R.Fp, 2)        // T1 <- y                          
                             .Movli(R.T3, 1)
                             .Movli(R.T4, 31)
                             .Sub(R.T4, R.T4, R.T1)
                             .Shl(R.T4, R.T3, R.T4)
-                            .Ldr(R.T3, R.T2)
+                            .Ldrx(R.T3, R.G0, R.T0)
                             .Or(R.T3, R.T3, R.T4)
-                            .Str(R.T3, R.T2)
+                            .Strx(R.T3, R.G0, R.T0)
 
                             // epilog
                             .Pop(R.Ra)
@@ -125,15 +124,14 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Push(R.Ra)
 
                             .Ldr(R.T0, R.Fp, 1)        // T0 <- x
-                            .Ldr(R.T1, R.Fp, 2)        // T1 <- y
-                            .Add(R.T2, R.G0, R.T0)     // T2 <- VIDEO + x
+                            .Ldr(R.T1, R.Fp, 2)        // T1 <- y                       
                             .Movli(R.T3, 1)
                             .Movli(R.T4, 31)
                             .Sub(R.T4, R.T4, R.T1)
                             .Shl(R.T4, R.T3, R.T4)
-                            .Ldr(R.T3, R.T2)
+                            .Ldrx(R.T3, R.G0, R.T0)
                             .Or(R.T3, R.T3, R.T4)
-                            .Str(R.T3, R.T2)
+                            .Strx(R.T3, R.G0, R.T0)
 
                             // epilog
                             .Pop(R.Ra)
@@ -154,7 +152,6 @@ namespace ArturBiniek.Tbx32.Simulator
         private static IReadOnlyDictionary<uint, uint> createTetris()
         {
             var builder = new CodeBuilder();
-
 
             var programEntry = builder.CreateLabel();
 
@@ -225,10 +222,8 @@ namespace ArturBiniek.Tbx32.Simulator
                     .MarkLabel(createBoard_loop3_start)
                         .Bge(R.T0, R.T1, createBoard_loop3_end)
 
-                        .Add(R.T2, R.G1, R.T0)
-                        .Ldr(R.T7, R.T2)
-                        .Add(R.T2, R.G0, R.T0)
-                        .Str(R.T7, R.T2)
+                        .Ldrx(R.T7, R.G1, R.T0)
+                        .Strx(R.T7, R.G0, R.T0)
 
                         .Inc(R.T0)
                         .Jmp(createBoard_loop3_start)
@@ -238,9 +233,6 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Pop(R.Ra)
                     .Pop(R.Fp)
                     .Jmpr(R.Ra)
-
-                    //.MarkLabel(createBoard_const2)
-                    //    .Data(0xFFF00000)
 
                 ;
 
