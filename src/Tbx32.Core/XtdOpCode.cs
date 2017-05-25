@@ -14,6 +14,9 @@
         Xor,
 
         Not,
-        Neg
+        Neg,
+
+        Ldrx,
+        Strx
     }
 }

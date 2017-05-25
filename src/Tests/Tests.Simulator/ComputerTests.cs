@@ -1431,5 +1431,43 @@ namespace Tests.Simulator
 
             Assert.That(comp[Register.R20], Is.EqualTo(a));
         }
+
+        [Test]
+        public void LdrxAndStrxInstructionShouldWork()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var loopStart = prg.CreateLabel();
+
+            prg
+                .Movi(R.G3, 0x100)
+                .Movi(R.G5, 0x200)
+                
+                .Movi(R.T1, 0)
+                .Movi(R.T2, 10)
+
+                .MarkLabel(loopStart)
+                .Ldrx(R.S0, R.G3, R.T1)
+                .Strx(R.S0, R.G5, R.T1)
+                .Inc(R.T1)
+                .Blt(R.T1, R.T2, loopStart)
+
+                .Hlt()
+
+                .SetOrg(0x100)
+                .Data(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+                
+                ;
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            for(int i = 0; i < 10; i++)
+            {
+                Assert.That(comp[(uint)(0x100 + i)] == i + 1);
+                Assert.That(comp[(uint)(0x200 + i)] == i + 1);
+            }
+        }
     }
 }

@@ -109,7 +109,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     break;
 
                 case OpCode.Rnd:
-                    _regs[ra] = _rnd.Next(int.MinValue, int.MaxValue);
+                    _regs[ra] = _rnd.Next(0, int.MaxValue);
                     break;
 
                 case OpCode.Str:
@@ -286,6 +286,14 @@ namespace ArturBiniek.Tbx32.Simulator
 
                         case XtdOpCode.Neg:
                             _regs[ra] = -_regs[rb];
+                            break;
+
+                        case XtdOpCode.Ldrx:
+                            _regs[ra] = _ram[(uint)(_regs[rb] + _regs[rc])];
+                            break;
+
+                        case XtdOpCode.Strx:
+                            _ram[(uint)(_regs[rb] + _regs[rc])] = _regs[ra];
                             break;
                     }
                     break;

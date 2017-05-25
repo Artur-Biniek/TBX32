@@ -33,5 +33,10 @@
                     .Movhi(reg, (short)((value & 0xFFFF0000) >> 16))
                     .Ori(reg, reg, (short)(value & 0x0000FFFF));
         }
+
+        public static CodeBuilder Movi(this CodeBuilder builder, Register reg, uint value)
+        {
+            return Movi(builder, reg, (int)value);
+        }
     }
 }

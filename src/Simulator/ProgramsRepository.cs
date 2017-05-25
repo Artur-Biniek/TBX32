@@ -11,9 +11,9 @@ namespace ArturBiniek.Tbx32.Simulator
             get { return createDiagonalLineProgram(); }
         }
 
-        public static IReadOnlyDictionary<uint, uint> DiagonalLineProgramWithTimeDependance
+        public static IReadOnlyDictionary<uint, uint> ClockDependendRandomDotsProgram
         {
-            get { return createClockDependendDiagonalLineProgram(); }
+            get { return createClockDependendRandomDotsProgram(); }
         }
 
         public static IReadOnlyDictionary<uint, uint> Tetris
@@ -78,7 +78,7 @@ namespace ArturBiniek.Tbx32.Simulator
             return prg;
         }
 
-        private static IReadOnlyDictionary<uint, uint> createClockDependendDiagonalLineProgram()
+        private static IReadOnlyDictionary<uint, uint> createClockDependendRandomDotsProgram()
         {
             var builder = new CodeBuilder();
 
@@ -103,9 +103,15 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Movli(R.T1, 1000)       // T1 <- 1000ms delay
                             .Blt(R.T0, R.T1, whileLoop) // jump back to the begining if less than 1000ms
                             .Ldr(R.S2, R.G1)
+               
                             .Push(R.Fp)
+
                             .Push(R.S0)
-                            .Push(R.S0)
+
+                            .Rnd(R.T2)              // T2 <- rnd 0..31
+                            .Modi(R.T2, R.T2, 32)
+                            .Push(R.T2)
+
                             .Jal(R.Ra, putPixel)
                             .Addi(R.S0, R.S0, 1)
                             .Jmp(whileLoop)
@@ -149,29 +155,35 @@ namespace ArturBiniek.Tbx32.Simulator
         {
             var builder = new CodeBuilder();
 
+
+            var programEntry = builder.CreateLabel();
+
             var createBoard = builder.CreateLabel();
-            var createBoard_const1 = builder.CreateLabel();
-            var createBoard_const2 = builder.CreateLabel();
+
             var createBoard_loop1_start = builder.CreateLabel();
             var createBoard_loop1_end = builder.CreateLabel();
             var createBoard_loop2_start = builder.CreateLabel();
             var createBoard_loop2_end = builder.CreateLabel();
+            var createBoard_loop3_start = builder.CreateLabel();
+            var createBoard_loop3_end = builder.CreateLabel();
 
-            var video = builder.CreateLabel();
-            var board = builder.CreateLabel();
+            var prg = builder
+                
+                .Jmp(programEntry)
 
-            var prg = builder.Nop()
+                .Data(Enumerable.Repeat(0, 20).ToArray())
 
-                .Ld(R.G0, video)
-                .Ld(R.G1, board)
+                .MarkLabel(programEntry)
 
-                .Push(R.Fp)
-                .Jal(R.Ra, createBoard)
+                    .Movi(R.G0, Computer.VIDEO_START)     // G0 <- video ram start
+                    .Movli(R.G1, 1)     // G1 <- board array
+
+                    .Push(R.Fp)
+                    .Jal(R.Ra, createBoard)
 
 
 
-
-                .Hlt()
+                    .Hlt()
 
                 .MarkLabel(createBoard)
                     //prolog
@@ -195,35 +207,41 @@ namespace ArturBiniek.Tbx32.Simulator
 
                     .Movli(R.T0, 0)
                     .Movli(R.T1, 20)
-                    .Ld(R.T7, createBoard_const1)
+                    .Movi(R.T7, 0x80100000)
 
                     .MarkLabel(createBoard_loop2_start)
                         .Bge(R.T0, R.T1, createBoard_loop2_end)
 
-                        .Add(R.T2, R.G0, R.T0)
+                        .Add(R.T2, R.G1, R.T0)
                         .Str(R.T7, R.T2)
 
                         .Inc(R.T0)
                         .Jmp(createBoard_loop2_start)
                     .MarkLabel(createBoard_loop2_end)
 
+                    .Movli(R.T0, 0)
+                    .Movli(R.T1, 20)                    
+
+                    .MarkLabel(createBoard_loop3_start)
+                        .Bge(R.T0, R.T1, createBoard_loop3_end)
+
+                        .Add(R.T2, R.G1, R.T0)
+                        .Ldr(R.T7, R.T2)
+                        .Add(R.T2, R.G0, R.T0)
+                        .Str(R.T7, R.T2)
+
+                        .Inc(R.T0)
+                        .Jmp(createBoard_loop3_start)
+                    .MarkLabel(createBoard_loop3_end)
+
                     //epilog
                     .Pop(R.Ra)
                     .Pop(R.Fp)
                     .Jmpr(R.Ra)
 
-                    .MarkLabel(createBoard_const1)
-                        .Data(0x80100000)
-                    .MarkLabel(createBoard_const2)
-                        .Data(0xFFF00000)
+                    //.MarkLabel(createBoard_const2)
+                    //    .Data(0xFFF00000)
 
-                .MarkLabel(video)
-                    .Data(Computer.VIDEO_START)
-
-
-
-                .MarkLabel(board)
-                    .Data(Enumerable.Repeat(0, 20).ToArray());
                 ;
 
             return prg.Build();

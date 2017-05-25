@@ -385,7 +385,6 @@ namespace Tbx32.Core
             return push(createXtdType(XtdOpCode.Or, target, leftSource, rightSource));
         }
 
-
         public CodeBuilder Xor(Register target, Register leftSource, Register rightSource)
         {
             return push(createXtdType(XtdOpCode.Xor, target, leftSource, rightSource));
@@ -399,6 +398,16 @@ namespace Tbx32.Core
         public CodeBuilder Neg(Register target, Register source)
         {
             return push(createXtdType(XtdOpCode.Neg, target, source, 0));
+        }
+
+        public CodeBuilder Ldrx(Register target, Register source, Register offset)
+        {
+            return push(createXtdType(XtdOpCode.Ldrx, target, source, offset));
+        }
+
+        public CodeBuilder Strx(Register target, Register source, Register offset)
+        {
+            return push(createXtdType(XtdOpCode.Strx, target, source, offset));
         }
 
         public CodeBuilder Nop()
