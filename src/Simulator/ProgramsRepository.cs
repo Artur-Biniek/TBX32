@@ -16,6 +16,11 @@ namespace ArturBiniek.Tbx32.Simulator
             get { return createClockDependendRandomDotsProgram(); }
         }
 
+        public static IReadOnlyDictionary<uint, uint> BouncingBallProgram
+        {
+            get { return createBouncingBallProgram(); }
+        }
+
         public static IReadOnlyDictionary<uint, uint> Tetris
         {
             get { return createTetris(); }
@@ -99,8 +104,8 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Bgt(R.S0, R.S1, exitLoop)
                             .Ldr(R.T0, R.G1)        // T0 <- current time
                             .Sub(R.T0, R.T0, R.S2)  // T0 <- old time - current time
-                            .Movli(R.T1, 1000)       // T1 <- 1000ms delay
-                            .Blt(R.T0, R.T1, whileLoop) // jump back to the begining if less than 1000ms
+                            .Movli(R.T1, 200)       // T1 <- 200ms delay
+                            .Blt(R.T0, R.T1, whileLoop) // jump back to the begining if less than 200ms
                             .Ldr(R.S2, R.G1)
                
                             .Push(R.Fp)
@@ -144,6 +149,127 @@ namespace ArturBiniek.Tbx32.Simulator
                         .MarkLabel(lowClock)
                             .Data((int)Computer.TICKS_LOW)
 
+                        .Build();
+
+            return prg;
+        }
+
+        private static IReadOnlyDictionary<uint, uint> createBouncingBallProgram()
+        {
+            var builder = new CodeBuilder();
+
+            var video = builder.CreateLabel();
+            var putPixel = builder.CreateLabel();
+            var whileLoop = builder.CreateLabel();
+
+            var if1end = builder.CreateLabel();
+            var if2end = builder.CreateLabel();
+            var if3end = builder.CreateLabel();
+            var if4end = builder.CreateLabel();
+
+            var putPixel_if1end = builder.CreateLabel();
+            var putPixel_if1else = builder.CreateLabel();
+
+            var prg = builder
+
+                        .Movi(R.G0, Computer.VIDEO_START)
+
+                        .Movli(R.S0, 0)  // x
+                        .Movli(R.S1, 7)  // y
+                        .Movli(R.S2, 1)  // dx
+                        .Movli(R.S3, 1)  // dy
+
+                        .Movli(R.T0, 1)
+
+                        .MarkLabel(whileLoop)
+                            .Dec(R.T0)
+                            .Brnz(R.T0, whileLoop)
+                            
+                           
+                            .Movli(R.T0, 0)
+                            .Movli(R.T1, -1)
+                            .Bneq(R.S0, R.T0, if1end)
+                            .Bneq(R.S2, R.T1, if1end)
+                            .Movli(R.S2, 1)
+
+                        .MarkLabel(if1end)
+
+                            .Movli(R.T0, 19)
+                            .Movli(R.T1, 1)
+                            .Bneq(R.S0, R.T0, if2end)
+                            .Bneq(R.S2, R.T1, if2end)
+                            .Movli(R.S2, -1)
+
+                        .MarkLabel(if2end)
+
+                            .Movli(R.T0, 0)
+                            .Movli(R.T1, -1)
+                            .Bneq(R.S1, R.T0, if3end)
+                            .Bneq(R.S3, R.T1, if3end)
+                            .Movli(R.S3, 1)
+
+                        .MarkLabel(if3end)
+
+                            .Movli(R.T0, 31)
+                            .Movli(R.T1, 1)
+                            .Bneq(R.S1, R.T0, if4end)
+                            .Bneq(R.S3, R.T1, if4end)
+                            .Movli(R.S3, -1)
+
+                        .MarkLabel(if4end)
+
+                            .Push(R.S1)
+
+                            .Add(R.S0, R.S0, R.S2)
+                            .Add(R.S1, R.S1, R.S3)
+ 
+                            .Push(R.Fp)
+                            .Push(R.S0)
+                            .Push(R.S1)
+                            .Jal(R.Ra, putPixel)
+
+                            .Pop(R.T1)
+                            .Movli(R.T0, 0xFFF)
+                            .Strx(R.T0, R.G0, R.T1)
+
+
+                            .Movli(R.T0, 80)
+
+                            .Jmp(whileLoop)
+
+                            .Hlt()
+
+                        .MarkLabel(putPixel)
+                            // prolog
+                            .Mov(R.Fp, R.Sp)
+                            .Push(R.Ra)
+
+                            .Ldr(R.T0, R.Fp, 1)        // T0 <- x
+                            .Ldr(R.T1, R.Fp, 2)        // T1 <- y
+
+                            .Movli(R.T3, 1)
+                            .Movli(R.T4, 31)
+                            .Sub(R.T4, R.T4, R.T1)
+                            .Shl(R.T4, R.T3, R.T4)
+                            .Ldrx(R.T3, R.G0, R.T0)                       
+                            .Or(R.T3, R.T3, R.T4)
+                            .Strx(R.T3, R.G0, R.T0)
+
+                            // epilog
+                            .Pop(R.Ra)
+                            .Addi(R.Sp, R.Sp, 2)
+                            .Pop(R.Fp)
+                            .Jmpr(R.Ra)
+
+                            .SetOrg(Computer.VIDEO_START)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
+                            .Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF).Data(0x00000FFF)
                         .Build();
 
             return prg;

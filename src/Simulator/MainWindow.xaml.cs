@@ -44,7 +44,7 @@ namespace ArturBiniek.Tbx32.Simulator
             _dispatcherTimer.IsEnabled = false;
 
             _comp = new Computer();
-            _comp.LoadProgram(ProgramsRepository.ClockDependendRandomDotsProgram);
+            _comp.LoadProgram(ProgramsRepository.BouncingBallProgram);
 
             screenRefresh();
         }

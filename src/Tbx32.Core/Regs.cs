@@ -29,9 +29,16 @@
         public const Register G4 = Register.R17;
         public const Register G5 = Register.R18;
         public const Register G6 = Register.R19;
-        public const Register G7 = Register.R20;        
+        public const Register G7 = Register.R20;
 
-        //...
+        // more temporaries
+        public const Register T8 = Register.R21;
+        public const Register T9 = Register.R22;
+        public const Register T10 = Register.R23;
+        public const Register T11 = Register.R24;
+        public const Register T12 = Register.R25;
+        public const Register T13 = Register.R26;
+        public const Register T14 = Register.R27;
 
         // assembler reserved register
         public const Register AsmRes = Register.R28;
