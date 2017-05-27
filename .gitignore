@@ -12,3 +12,8 @@
 /src/Simulator/obj/Debug
 /src/Tbx32.Core/obj/Debug
 /src/Tbx32.Core/bin/Debug
+/src/Simulator/bin/Release
+/src/Simulator/obj/Release
+/src/Tbx32.Core/bin/Release
+/src/Tbx32.Core/obj/Release
+/src/Tests/Tests.Simulator/bin/Release

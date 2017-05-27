@@ -16,6 +16,8 @@
 
         Brz,            // Branch if Zero
         Brnz,           // Branch if Not Zero
+        Brgz,           // Branch if Greater than Zero
+        Brlz,           // Branch if Less than Zero
 
         // Offset format - OPCODE | RA | RB | OFFSET
         Ldr,            // Load Register

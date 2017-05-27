@@ -143,6 +143,20 @@ namespace ArturBiniek.Tbx32.Simulator
                     }
                     break;
 
+                case OpCode.Brgz:
+                    if (_regs[ra] > 0)
+                    {
+                        _PC = address;
+                    }
+                    break;
+
+                case OpCode.Brlz:
+                    if (_regs[ra] < 0)
+                    {
+                        _PC = address;
+                    }
+                    break;
+
                 case OpCode.Beq:
                     if (_regs[ra] == _regs[rb])
                     {

@@ -340,6 +340,16 @@ namespace Tbx32.Core
             return pushDelayed(() => createAddressType(OpCode.Brnz, reg, target));
         }
 
+        public CodeBuilder Brgz(Register reg, Label target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.Brgz, reg, target));
+        }
+
+        public CodeBuilder Brlz(Register reg, Label target)
+        {
+            return pushDelayed(() => createAddressType(OpCode.Brlz, reg, target));
+        }
+
         public CodeBuilder Add(Register target, Register leftSource, Register rightSource)
         {
             return push(createXtdType(XtdOpCode.Add, target, leftSource, rightSource));

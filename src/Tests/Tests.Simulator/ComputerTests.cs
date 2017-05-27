@@ -988,6 +988,56 @@ namespace Tests.Simulator
         }
 
         [Test]
+        [TestCase(-1, 88)]
+        [TestCase(0, 88)]
+        [TestCase(1, 55)]
+        public void BrgzJumpsWhenRegisterIsGreaterThanZero(short value, short ecpect)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movli(R.G0, value)
+                .Movli(R.G1, 55)
+                .Brgz(R.G0, target1)
+                .Movli(R.G1, 88)
+                .MarkLabel(target1)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G1] == ecpect);
+        }
+
+        [Test]
+        [TestCase(-1, 55)]
+        [TestCase(0, 88)]
+        [TestCase(1, 88)]
+        public void BrlzJumpsWhenRegisterIsLessThanZero(short value, short ecpect)
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg
+                .Movli(R.G0, value)
+                .Movli(R.G1, 55)
+                .Brlz(R.G0, target1)
+                .Movli(R.G1, 88)
+                .MarkLabel(target1)
+                .Hlt();
+
+            comp.LoadProgram(prg.Build());
+            comp.Run();
+
+            Assert.That(comp[R.G1] == ecpect);
+        }
+
+        [Test]
         public void BeqJumpsWhenRegistersAreEqual()
         {
             var prg = new CodeBuilder();
