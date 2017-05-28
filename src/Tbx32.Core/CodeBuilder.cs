@@ -445,5 +445,10 @@ namespace Tbx32.Core
         {
             return push(createAddressType(OpCode.Hlt, 0, null));
         }
+
+        public CodeBuilder Brk()
+        {
+            return push(createAddressType(OpCode.Brk, 0, null));
+        }
     }
 }

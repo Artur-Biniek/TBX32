@@ -250,6 +250,10 @@ namespace ArturBiniek.Tbx32.Simulator
                     _PC--;
                     return false;
 
+                case OpCode.Brk:
+                    var breakHere = 0xC;
+                    break;
+
                 case OpCode.Xtd:
                     XtdOpCode fun = CodeBuilder.ExtractXtdOpCode(_IR);
                     switch (fun)

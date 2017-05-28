@@ -3,6 +3,8 @@
     public enum OpCode
     {
         Hlt = 0,
+        
+        Brk, 
 
         // Address format - OPCODE | RA | ADDRESS
         Ld,             // Load
