@@ -533,9 +533,9 @@ namespace Tests.Simulator
             var comp = new Computer();
 
             prg.Movli(Register.R0, 1234)
-               .Mov(Register.R1, Register.R0)
-               .Mov(Register.R2, Register.R1)
-               .Mov(Register.R3, Register.R2);
+               .Mov_(Register.R1, Register.R0)
+               .Mov_(Register.R2, Register.R1)
+               .Mov_(Register.R3, Register.R2);
 
             comp.LoadProgram(prg.Build());
             comp.Run();
@@ -1474,7 +1474,7 @@ namespace Tests.Simulator
             var prg = new CodeBuilder();
             var comp = new Computer();
 
-            prg.Movi(Register.R20, a);
+            prg.Movi_(Register.R20, a);
 
             comp.LoadProgram(prg.Build());
             comp.Run();
@@ -1491,16 +1491,16 @@ namespace Tests.Simulator
             var loopStart = prg.CreateLabel();
 
             prg
-                .Movi(R.G3, 0x100)
-                .Movi(R.G5, 0x200)
+                .Movi_(R.G3, 0x100)
+                .Movi_(R.G5, 0x200)
                 
-                .Movi(R.T1, 0)
-                .Movi(R.T2, 10)
+                .Movi_(R.T1, 0)
+                .Movi_(R.T2, 10)
 
                 .MarkLabel(loopStart)
                 .Ldrx(R.S0, R.G3, R.T1)
                 .Strx(R.S0, R.G5, R.T1)
-                .Inc(R.T1)
+                .Inc_(R.T1)
                 .Blt(R.T1, R.T2, loopStart)
 
                 .Hlt()

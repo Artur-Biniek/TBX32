@@ -58,6 +58,7 @@
     <Compile Include="ProgramsRepository.cs" />
     <Compile Include="Registers.cs" />
     <Compile Include="Computer.cs" />
+    <Compile Include="TetrisProgramBuilder.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

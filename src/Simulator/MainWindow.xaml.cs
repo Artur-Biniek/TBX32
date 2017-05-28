@@ -44,7 +44,7 @@ namespace ArturBiniek.Tbx32.Simulator
             _dispatcherTimer.IsEnabled = false;
 
             _comp = new Computer();
-            _comp.LoadProgram(ProgramsRepository.BouncingBallProgram);
+            _comp.LoadProgram(ProgramsRepository.Tetris);
 
             screenRefresh();
         }
@@ -91,7 +91,8 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private void screenRefresh()
         {
-            this.Title = _comp.PC.ToString();
+            Title = _comp.PC.ToString();
+            txtAvg.Text = _comp[Computer.SEG_DISP].ToString();
 
             for (int row = 0; row < 32; row++)
             {

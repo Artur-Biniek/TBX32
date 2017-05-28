@@ -28,26 +28,26 @@ namespace Tests.Simulator
 
                 // program start
 
-                .Push(R.Fp)
+                .Push_(R.Fp)
 
                 .Movli(R.T0, a)
                 .Movli(R.T1, b)
 
-                .Push(R.T1)
-                .Push(R.T0)
+                .Push_(R.T1)
+                .Push_(R.T0)
 
                 .Jal(R.Ra, addFunction) // call add function
 
-                .Mov(R.G0, R.V) // stash sumation result into G0
+                .Mov_(R.G0, R.V) // stash sumation result into G0
 
 
-                .Push(R.Fp)
+                .Push_(R.Fp)
 
                 .Movli(R.T0, a)
                 .Movli(R.T1, b)
 
-                .Push(R.T1)
-                .Push(R.T0)
+                .Push_(R.T1)
+                .Push_(R.T0)
 
                 .Jal(R.Ra, subFunction) // call sub function
 
@@ -55,8 +55,8 @@ namespace Tests.Simulator
 
                 .MarkLabel(addFunction)
                     // prolog
-                    .Mov(R.Fp, R.Sp)
-                    .Push(R.Ra)
+                    .Mov_(R.Fp, R.Sp)
+                    .Push_(R.Ra)
 
                     // function code
                     .Ldr(R.T3, R.Fp, 1)
@@ -64,15 +64,15 @@ namespace Tests.Simulator
                     .Add(R.V, R.T3, R.T4)
 
                     // epilog
-                    .Pop(R.Ra)
+                    .Pop_(R.Ra)
                     .Addi(R.Sp, R.Sp, 2)
-                    .Pop(R.Fp)
+                    .Pop_(R.Fp)
                     .Jmpr(R.Ra)
 
                 .MarkLabel(subFunction)
                     // prolog
-                    .Mov(R.Fp, R.Sp)
-                    .Push(R.Ra)
+                    .Mov_(R.Fp, R.Sp)
+                    .Push_(R.Ra)
 
                     // function code
                     .Ldr(R.T3, R.Fp, 1)
@@ -80,9 +80,9 @@ namespace Tests.Simulator
                     .Sub(R.V, R.T3, R.T4)
 
                     // epilog
-                    .Pop(R.Ra)
+                    .Pop_(R.Ra)
                     .Addi(R.Sp, R.Sp, 2)
-                    .Pop(R.Fp)
+                    .Pop_(R.Fp)
                     .Jmpr(R.Ra);
 
             comp.LoadProgram(prg.Build());

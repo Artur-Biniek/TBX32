@@ -2,41 +2,41 @@
 {
     public static class CodeBuilderExtentions
     {
-        public static CodeBuilder Mov(this CodeBuilder builder, Register target, Register source)
+        public static CodeBuilder Mov_(this CodeBuilder builder, Register target, Register source)
         {
             return builder.Addi(target, source, 0);
         }
 
-        public static CodeBuilder Push(this CodeBuilder builder, Register reg)
+        public static CodeBuilder Push_(this CodeBuilder builder, Register reg)
         {
             return builder.Str(reg, R.Sp).Addi(R.Sp, R.Sp, -1);
         }
 
-        public static CodeBuilder Pop(this CodeBuilder builder, Register reg)
+        public static CodeBuilder Pop_(this CodeBuilder builder, Register reg)
         {
             return builder.Addi(R.Sp, R.Sp, +1).Ldr(reg, R.Sp);
         }
 
-        public static CodeBuilder Inc(this CodeBuilder builder, Register reg)
+        public static CodeBuilder Inc_(this CodeBuilder builder, Register reg)
         {
             return builder.Addi(reg, reg, +1);
         }
 
-        public static CodeBuilder Dec(this CodeBuilder builder, Register reg)
+        public static CodeBuilder Dec_(this CodeBuilder builder, Register reg)
         {
             return builder.Addi(reg, reg, -1);
         }
 
-        public static CodeBuilder Movi(this CodeBuilder builder, Register reg, int value)
+        public static CodeBuilder Movi_(this CodeBuilder builder, Register reg, int value)
         {
             return builder
                     .Movhi(reg, (short)((value & 0xFFFF0000) >> 16))
                     .Ori(reg, reg, (short)(value & 0x0000FFFF));
         }
 
-        public static CodeBuilder Movi(this CodeBuilder builder, Register reg, uint value)
+        public static CodeBuilder Movi_(this CodeBuilder builder, Register reg, uint value)
         {
-            return Movi(builder, reg, (int)value);
+            return Movi_(builder, reg, (int)value);
         }
     }
 }
