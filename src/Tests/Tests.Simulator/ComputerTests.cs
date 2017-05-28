@@ -1519,5 +1519,31 @@ namespace Tests.Simulator
                 Assert.That(comp[(uint)(0x200 + i)] == i + 1);
             }
         }
+
+        [Test]
+        public void LdAndStShouldWorkOnDirectAddresses()
+        {
+            var prg = new CodeBuilder();
+            var comp = new Computer();
+
+            var target1 = prg.CreateLabel();
+
+            prg.Movli(R.T14, 0x666)
+               .St(R.T14, 0x555)
+               .Ld(R.T3, 0x555)
+
+               .SetOrg(0x555)
+               .Data(123);
+
+            comp.LoadProgram(prg.Build());
+
+            Assert.That(comp[(uint)0x555], Is.EqualTo(123));
+
+            comp.Run();
+
+            Assert.That(comp[(uint)0x555], Is.EqualTo(0x666));
+            Assert.That(comp[R.T14], Is.EqualTo(0x666));
+            Assert.That(comp[R.T3], Is.EqualTo(0x666));
+        }
     }
 }

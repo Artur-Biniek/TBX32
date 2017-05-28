@@ -38,5 +38,10 @@
         {
             return Movi_(builder, reg, (int)value);
         }
+
+        public static CodeBuilder Rnd_(this CodeBuilder builder, Register reg, short value)
+        {
+            return builder.Rnd(reg).Modi(reg, reg, value);
+        }
     }
 }

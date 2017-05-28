@@ -70,12 +70,18 @@ namespace Tbx32.Core
                 throw new InvalidOperationException("Usage of unmarked lablel");
             }
 
-            uint res = 0u;
             uint address = lbl == null ? 0u : _labels[lbl];
+
+            return createAddressTypeInternal(opcode, reg, address);
+        }
+
+        private uint createAddressTypeInternal(OpCode opcode, Register reg, uint address)
+        {
+            uint res = 0u;
 
             if ((address & ~0x001FFFFF) != 0)
             {
-                throw new InvalidOperationException("Label out of 21 bit addresable range");
+                throw new InvalidOperationException("Address out of 21 bit addresable range");
             }
 
             res = (uint)opcode << 26
@@ -259,6 +265,11 @@ namespace Tbx32.Core
             return pushDelayed(() => createAddressType(OpCode.Ld, target, source));
         }
 
+        public CodeBuilder Ld(Register target, uint source)
+        {
+            return push(createAddressTypeInternal(OpCode.Ld, target, source));
+        }
+
         public CodeBuilder Ldr(Register target, Register source, short offset = 0)
         {
             return push(createOffsetType(OpCode.Ldr, target, source, offset));
@@ -267,6 +278,11 @@ namespace Tbx32.Core
         public CodeBuilder St(Register source, Label target)
         {
             return pushDelayed(() => createAddressType(OpCode.St, source, target));
+        }
+
+        public CodeBuilder St(Register source, uint target)
+        {
+            return push(createAddressTypeInternal(OpCode.St, source, target));
         }
 
         public CodeBuilder Rnd(Register target)
