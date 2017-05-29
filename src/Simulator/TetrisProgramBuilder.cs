@@ -13,6 +13,7 @@ namespace ArturBiniek.Tbx32.Simulator
             public CodeBuilder.Label GenerateTetrominoProc { get; private set; }
             public CodeBuilder.Label CanMoveBlockProc { get; private set; }
             public CodeBuilder.Label MergeBlockProc { get; private set; }
+            public CodeBuilder.Label BlitBlockProc { get; private set; }
 
 
             public CodeBuilder.Label TEMP_DUMP_BOARD_TO_SCREEN { get; private set; }
@@ -24,6 +25,8 @@ namespace ArturBiniek.Tbx32.Simulator
                 GenerateTetrominoProc = builder.CreateLabel();
                 CanMoveBlockProc = builder.CreateLabel();
                 MergeBlockProc = builder.CreateLabel();
+                BlitBlockProc = builder.CreateLabel();
+
                 TEMP_DUMP_BOARD_TO_SCREEN = builder.CreateLabel();
             }
         }
@@ -34,6 +37,8 @@ namespace ArturBiniek.Tbx32.Simulator
         public const uint __NEXT_BLOCK = __START_LOCATION_DATA + 28;
         public const uint __NEXT_ROTATION = __NEXT_BLOCK + 1;
         public const uint __PLAYING = __NEXT_ROTATION + 1;
+        public const uint __FULL_LINE_MASK = __PLAYING + 1;
+        public const uint __COPY_LINE_MASK = __FULL_LINE_MASK + 1;
 
 
         public const Register G__CURRENT_BLOCK = R.G6;
@@ -41,10 +46,15 @@ namespace ArturBiniek.Tbx32.Simulator
         public const Register G__CURRENT_ROW = R.G4;
         public const Register G__CURRENT_COL = R.G3;
 
-
         public const Register G__VIDEO_START = R.G0;
 
-        public const short BOARD_HEIGHT = 20;
+        public const short CONSTVAL_BOARD_HEIGHT = 20;
+
+        const short CONSTVAL_BOARD_HORIZONTAL_SHIFT = 11;
+        const short CONSTVAL_BOARD_VERTICAL_SHIFT = 6;
+
+        public const uint CONSTVAL_FULL_LINE_MASK = 0x03FF;
+        public const uint CONSTVAL_COPY_LINE_MASK = ~(CONSTVAL_FULL_LINE_MASK << CONSTVAL_BOARD_HORIZONTAL_SHIFT);
 
         public static IReadOnlyDictionary<uint, uint> Create()
         {
@@ -58,11 +68,11 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 .Jmp(programEntry)
 
-                // var Board : int[20]
+                // int[20] Board ;
                 .SetOrg(__BOARD)
                 .Data(Enumerable.Repeat(0, 20).ToArray())
 
-                // const BLOCKS_DATA : uint[28]
+                // const uint[28] BLOCKS_DATA;
                 .SetOrg(__BLOCKS_DATA)
                 .Data(
                     0x0F00, 0x2222, 0x00f0, 0x4444, // I-block
@@ -73,7 +83,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     0x4E00, 0x4640, 0x0E40, 0x4C40, // T-block
                     0xC600, 0x2640, 0x0C60, 0x4C80)  // Z-block
 
-                // const START_LOCATION_DATA : int[28]
+                // const int[28] START_LOCATION_DATA;
                 .SetOrg(__START_LOCATION_DATA)
                 .Data(
                     -1, 0, -2, 0,
@@ -84,17 +94,25 @@ namespace ArturBiniek.Tbx32.Simulator
                     0, 0, -1, 0,
                     0, 0, -1, 0)
 
-                // var NextBlock : uint;
+                // uint NextBlock;
                 .SetOrg(__NEXT_BLOCK)
                 .Data(0)
 
-                // var NextRotation : uint;
+                // uint NextRotation;
                 .SetOrg(__NEXT_ROTATION)
                 .Data(0)
 
-                // var Playing : bool;
+                // bool Playing;
                 .SetOrg(__PLAYING)
                 .Data(0)
+
+                //  const uint FULL_LINE_MASK = 0x03FF;
+                .SetOrg(__FULL_LINE_MASK)
+                .Data(CONSTVAL_FULL_LINE_MASK)
+
+                // const uint COPY_LINE_MASK = ~(FULL_LINE_MASK << BOARD_HORIZONTAL_SHIFT);
+                .SetOrg(__COPY_LINE_MASK)
+                .Data(CONSTVAL_COPY_LINE_MASK)
 
 
                 .MarkLabel(programEntry)
@@ -106,11 +124,18 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Push_(R.Fp)
                     .Jal(R.Ra, procedureLabels.InitGameProc)
 
-                    .Push_(R.Fp)
-                    .Jal(R.Ra, procedureLabels.MergeBlockProc)
+                    //.Push_(R.Fp)
+                    //.Jal(R.Ra, procedureLabels.MergeBlockProc)
 
+                    //.Push_(R.Fp)
+                    //.Jal(R.Ra, procedureLabels.TEMP_DUMP_BOARD_TO_SCREEN)
                     .Push_(R.Fp)
-                    .Jal(R.Ra, procedureLabels.TEMP_DUMP_BOARD_TO_SCREEN)
+                    .Push_(G__CURRENT_ROTATION)
+                    .Push_(G__CURRENT_COL)
+                    .Push_(G__CURRENT_ROW)
+                    .Jal(R.Ra, procedureLabels.BlitBlockProc)
+
+                    .Hlt()
 
                     .Jmp(gameLoop)
 
@@ -121,7 +146,7 @@ namespace ArturBiniek.Tbx32.Simulator
             create_GENERATE_TETROMINO(ref prg, procedureLabels);
             create_CAN_MOVE_BLOCK(ref prg, procedureLabels);
             create_MERGE_BLOCK(ref prg, procedureLabels);
-
+            create_BLIT_BLOCK(ref prg, procedureLabels);
 
 
             create_TEMP_DUMP_BOARD_TO_SCREEN(ref prg, procedureLabels);
@@ -136,7 +161,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     //prolog
                     .Mov_(R.Fp, R.Sp)
                     .Push_(R.Ra)
-                                     
+
                     // _sevenSegDisplay[0] = 0;
                     .Movli(R.T0, 0)
                     .Movi_(R.T1, Computer.SEG_DISP)
@@ -244,7 +269,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
                     // _curRow = START_LOCATION_DATA[_curBlock + _curRotation];
                     .Add(R.T0, G__CURRENT_BLOCK, G__CURRENT_ROTATION)
-                    .Ldr(G__CURRENT_ROW, R.T0, (short)__START_LOCATION_DATA)                    
+                    .Ldr(G__CURRENT_ROW, R.T0, (short)__START_LOCATION_DATA)
 
                     // _curCol = 3;
                     .Movli(G__CURRENT_COL, 3)
@@ -305,7 +330,6 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Mov_(R.Fp, R.Sp)
                     .Push_(R.Ra)
 
-                    //code
                     // uint mask = 0xF000;
                     .Movi_(mask, 0xF000)
 
@@ -333,7 +357,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
                         // if (i < 0 || i >= BOARD_HEIGHT) continue;
                         .Brlz(R.T0, forLoopContinue)
-                        .Movli(R.AsmRes, BOARD_HEIGHT)
+                        .Movli(R.AsmRes, CONSTVAL_BOARD_HEIGHT)
                         .Bge(R.T0, R.AsmRes, forLoopContinue)
 
                         // mem = _board[i];
@@ -395,7 +419,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     //prolog
                     .Mov_(R.Fp, R.Sp)
                     .Push_(R.Ra)
-                
+
                     .Movli(R.T0, 0)
                     .Movli(R.T1, 20)
 
@@ -411,7 +435,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
                     // delay a bit
                     .Movli(R.T0, 1000)
-                    .MarkLabel(loop1_start)   
+                    .MarkLabel(loop1_start)
                         .Dec_(R.T0)
                         .Brgz(R.T0, loop1_start)
                     .MarkLabel(loop1_end)
@@ -422,5 +446,120 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Pop_(R.Fp)
                     .Jmpr(R.Ra);
         }
+
+        private static void create_BLIT_BLOCK(ref CodeBuilder builder, Labels labels)
+        {
+            var forLoopStart = builder.CreateLabel();
+            var forLoopContinue = builder.CreateLabel();
+            var forLoopEnd = builder.CreateLabel();
+            var elseBranch = builder.CreateLabel();
+            var endIf = builder.CreateLabel();
+
+            var mask = R.T14;
+            var offset = R.T13;
+            var shft = R.T12;
+            var mem = R.T11;
+            var strip = R.T10;
+            var block = R.T9;
+            var rot = R.T8;
+            var col = R.T7;
+            var row = R.T6;
+
+            builder
+                .MarkLabel(labels.BlitBlockProc)
+                    //prolog
+                    .Mov_(R.Fp, R.Sp)
+                    .Push_(R.Ra)
+
+                    .Brk()
+
+                    // load arguments from stack
+                    .Ldr(row, R.Fp, 1)
+                    .Ldr(col, R.Fp, 2)
+                    .Ldr(rot, R.Fp, 3)
+
+                    // uint mask = 0xF000;
+                    .Movi_(mask, 0xF000)
+
+                    // int offset = 6; 
+                    .Movli(offset, 6)
+
+                    // int shft = 0; 
+                    .Movli(shft, 0)
+
+                    // uint block = BLOCKS_DATA[_curBlock + rot];
+                    .Add(R.T0, G__CURRENT_BLOCK, rot)
+                    .Ldr(block, R.T0, (short)__BLOCKS_DATA)
+
+                    // T0 --> i
+                    // T1 --> _curRow + 4
+                    // i = _curRow;
+
+                    .Addi(R.T1, row, 4)
+                    // for (i = row; i < row + 4; i++, mask >>= 4, offset -= 4)
+                    .Mov_(R.T0, row)
+                    .MarkLabel(forLoopStart)
+                        // {                      
+                        .Bge(R.T0, R.T1, forLoopEnd)
+
+                        // if (i < 0 || i >= BOARD_HEIGHT) continue;
+                        .Brlz(R.T0, forLoopContinue)
+                        .Movli(R.AsmRes, CONSTVAL_BOARD_HEIGHT)
+                        .Bge(R.T0, R.AsmRes, forLoopContinue)
+
+                        // mem = _board[i];
+                        .Ldr(mem, R.T0, (short)__BOARD)
+
+                        // strip = (uint)(block & mask);
+                        .And(strip, block, mask)
+
+                        // shft = offset + col;
+                        .Add(shft, offset, col)
+
+                        // if (shft >= 0) {
+                        .Brlz(shft, elseBranch)
+
+                        // strip >>= shft;
+                        .Shr(strip, strip, shft)
+                        .Jmp(endIf)
+
+                        // } else {
+                        .MarkLabel(elseBranch)
+
+                        // strip <<= (-shft);
+                        .Neg(R.AsmRes, shft)
+                        .Shl(strip, strip, R.AsmRes)
+
+                        // } 
+                        .MarkLabel(endIf)
+
+                        // mem |= strip;
+                        .Or(mem, mem, strip)
+
+                        // var maskedLine = _screenMemory[i + BOARD_VERTICAL_SHIFT] & COPY_LINE_MASK;
+                        .Addi(R.T3, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
+                        .Ldrx(R.T4, G__VIDEO_START, R.T3)
+
+                        // _screenMemory[i + BOARD_VERTICAL_SHIFT] = maskedLine | (mem << BOARD_HORIZONTAL_SHIFT);
+                        .Shli(R.AsmRes, mem, CONSTVAL_BOARD_HORIZONTAL_SHIFT)
+                        .Or(R.T4, R.T4, R.AsmRes)
+                        .Strx(R.T4, G__VIDEO_START, R.T3)
+
+                        // ... i++, mask >>= 4, offset -= 4)
+                        .MarkLabel(forLoopContinue)
+                        .Inc_(R.T0)
+                        .Shri(mask, mask, 4)
+                        .Addi(offset, offset, -4)
+                        .Jmp(forLoopStart)
+
+                    .MarkLabel(forLoopEnd)
+
+                    //epilog
+                    .Pop_(R.Ra)
+                    .Addi(R.Sp, R.Sp, 3)
+                    .Pop_(R.Fp)
+                    .Jmpr(R.Ra);
+        }
+
     }
 }

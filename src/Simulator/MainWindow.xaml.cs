@@ -41,10 +41,12 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private void reset()
         {
+            var prg = ProgramsRepository.Tetris;
+
             _dispatcherTimer.IsEnabled = false;
 
             _comp = new Computer();
-            _comp.LoadProgram(ProgramsRepository.Tetris);
+            _comp.LoadProgram(prg);
 
             screenRefresh();
         }
