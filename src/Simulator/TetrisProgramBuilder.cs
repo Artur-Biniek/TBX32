@@ -685,6 +685,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     //prolog
                     .Mov_(R.Fp, R.Sp)
                     .Push_(R.Ra)
+                    .Push_(R.S0)
 
                     // uint res = 0;
                     .Xor(R.V, R.V, R.V)
@@ -733,6 +734,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     // }
 
                     //epilog
+                    .Pop_(R.S0)
                     .Pop_(R.Ra)
                     .Pop_(R.Fp)
                     .Jmpr(R.Ra);
