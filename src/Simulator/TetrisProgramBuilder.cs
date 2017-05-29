@@ -35,7 +35,6 @@ namespace ArturBiniek.Tbx32.Simulator
         public const uint __FULL_LINE_MASK = __PLAYING + 1;
         public const uint __COPY_LINE_MASK = __FULL_LINE_MASK + 1;
 
-
         public const Register G__CURRENT_BLOCK = R.G6;
         public const Register G__CURRENT_ROTATION = R.G5;
         public const Register G__CURRENT_ROW = R.G4;
@@ -44,6 +43,7 @@ namespace ArturBiniek.Tbx32.Simulator
         public const Register G__VIDEO_START = R.G0;
 
         public const short CONSTVAL_BOARD_HEIGHT = 20;
+        public const short CONSTVAL_BOARD_WIDTH = 10;
 
         const short CONSTVAL_BOARD_HORIZONTAL_SHIFT = 11;
         const short CONSTVAL_BOARD_VERTICAL_SHIFT = 6;
@@ -57,7 +57,9 @@ namespace ArturBiniek.Tbx32.Simulator
             var procedureLabels = new Labels(builder);
 
             var programEntry = builder.CreateLabel();
-            var gameLoop = builder.CreateLabel();
+            var gameLoopStart = builder.CreateLabel();
+            var gameLoopEnd = builder.CreateLabel();
+            var gameOver = builder.CreateLabel();
 
             var prg = builder
 
@@ -114,22 +116,47 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Movi_(G__VIDEO_START, Computer.VIDEO_START)
                     .Push_(R.Fp)
                     .Jal(R.Ra, procedureLabels.InitGameProc)
-                    
-                    .Movli(R.S0, 0)
-                .MarkLabel(gameLoop)
 
-                .Push_(R.Fp)
+
+                .MarkLabel(gameLoopStart)
+
+                    .Push_(R.Fp)
                     .Push_(G__CURRENT_ROTATION)
-                    .Push_(G__CURRENT_COL)                    
+                    .Push_(G__CURRENT_COL)
                     .Push_(G__CURRENT_ROW)
                     .Jal(R.Ra, procedureLabels.BlitBlockProc)
 
-                    .Movli(R.T1, 15)
-                    .Inc_(R.S0)
-                    .Mov_(G__CURRENT_ROW, R.S0)
-                    .Blt(R.S0, R.T1, gameLoop)
+                    .Inc_(G__CURRENT_ROW)
 
-                .Hlt();
+                    .Push_(R.Fp)
+                    .Push_(G__CURRENT_ROTATION)
+                    .Push_(G__CURRENT_ROW)
+                    .Push_(G__CURRENT_COL)
+                    .Jal(R.Ra, procedureLabels.CanMoveBlockProc)
+
+                    .Brnz(R.V, gameLoopEnd)                    
+
+                    .Dec_(G__CURRENT_ROW)
+                    .Push_(R.Fp)
+                    .Jal(R.Ra, procedureLabels.MergeBlockProc)
+
+                    .Push_(R.Fp)
+                    .Jal(R.Ra, procedureLabels.GenerateTetrominoProc)
+
+                    .Ld(R.T0, __PLAYING)
+                    .Brz(R.T0, gameOver)
+
+                .MarkLabel(gameLoopEnd)
+                    .Jmp(gameLoopStart)
+
+                .MarkLabel(gameOver)
+                    .Push_(R.Fp)
+                    .Push_(G__CURRENT_ROTATION)
+                    .Push_(G__CURRENT_COL)
+                    .Push_(G__CURRENT_ROW)
+                    .Jal(R.Ra, procedureLabels.BlitBlockProc)
+
+                    .Hlt();
 
             create_INIT_GAME(ref prg, procedureLabels);
             create_CREATE_BOARD(ref prg, procedureLabels);
@@ -278,15 +305,132 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private static void create_CAN_MOVE_BLOCK(ref CodeBuilder builder, Labels labels)
         {
+            var outerLoopStart = builder.CreateLabel();
+            var outerLoopEnd = builder.CreateLabel();
+
+            var innerLoopStart = builder.CreateLabel();
+            var innerLoopEnd = builder.CreateLabel();
+
+            var endIf = builder.CreateLabel();
+
+            var returnFalse = builder.CreateLabel();
+            var returnTrue = builder.CreateLabel();
+
+            var epilog = builder.CreateLabel();
+            
+            var mask = R.T14;
+            var block = R.T13;
+            var x = R.T12;
+            var y = R.T11;
+            var drow = R.T10;
+            var dcol = R.T9;
+            var boardWidth = R.T8;
+            var boardHeight = R.T7;
+
+            var r = R.T0;
+            var c = R.T1;
+            var loopLimit = R.T2;
+
+            var tmp1 = R.T3;
+            var tmp2 = R.T4;
+            var tmp3 = R.T5;
+
             builder
                 .MarkLabel(labels.CanMoveBlockProc)
                     //prolog
                     .Mov_(R.Fp, R.Sp)
                     .Push_(R.Ra)
 
-                    // return true
-                    .Movli(R.V, 1)
 
+                    // load drow & dcol args to dedicated registers
+                    .Ldr(dcol, R.Fp, 1)
+                    .Ldr(drow, R.Fp, 2)
+
+                    // uint mask = 0x8000;
+                    .Movi_(mask, 0x8000)
+
+                    // init useful constants
+                    .Movli(boardWidth, CONSTVAL_BOARD_WIDTH)
+                    .Movli(boardHeight, CONSTVAL_BOARD_HEIGHT)
+
+                    // uint block = BLOCKS_DATA[_curBlock + drot];
+                    .Ldr(R.AsmRes, R.Fp, 3)
+                    .Add(R.AsmRes, G__CURRENT_BLOCK, R.AsmRes)
+                    .Ldr(block, R.AsmRes, (short)__BLOCKS_DATA)
+
+                    // for (int r = 0; r < 4; r++)
+                    .Movli(loopLimit, 4)
+                    .Movli(r, 0)
+                    .MarkLabel(outerLoopStart)
+                    .Bge(r, loopLimit, outerLoopEnd)
+                        // {
+
+                        // for (int c = 0; c < 4; c++)
+                        .Movli(c, 0)
+                        .MarkLabel(innerLoopStart)
+                        .Bge(c, loopLimit, innerLoopEnd)
+                            // {
+
+                            // if ((mask & block) != 0)
+                            .And(tmp1, mask, block)
+                            .Brz(tmp1, endIf)
+                                // {
+                                // x = c + dcol;
+                                .Add(x, c, dcol)
+
+                                // y = r + drow;
+                                .Add(y, r, drow)
+
+                                // if (x < 0) return false;
+                                .Brlz(x, returnFalse)
+
+                                // if (y < 0) return false;
+                                .Brlz(y, returnFalse)
+
+                                // if (x >= BOARD_WIDTH) return false;
+                                .Bge(x, boardWidth, returnFalse)
+
+                                // if (y >= BOARD_HEIGHT) return false;
+                                .Bge(y, boardHeight, returnFalse)
+
+                                // var line = _board[y];
+                                .Ldr(tmp1, y, (short)__BOARD)
+
+                                //var bit = BOARD_WIDTH - 1 - x;
+                                .Addi(tmp2, boardWidth, -1)
+                                .Sub(tmp2, tmp2, x)
+
+                                // if ((line & (1 << bit)) != 0) return false;
+                                .Movli(tmp3, 1)
+                                .Shl(tmp3, tmp3, tmp2)
+                                .And(tmp3, tmp1, tmp3)
+                                .Brnz(tmp3, returnFalse)
+
+                            .MarkLabel(endIf)
+                            // }
+
+                            // mask >>= 1;
+                            .Shri(mask, mask, 1)
+
+                        .Inc_(c)
+                        .Jmp(innerLoopStart)
+                        .MarkLabel(innerLoopEnd)
+                        // }
+
+                    .Inc_(r)
+                    .Jmp(outerLoopStart)
+                    .MarkLabel(outerLoopEnd)
+                    // }
+                    
+                    // return true;
+                    .MarkLabel(returnTrue)
+                    .Movli(R.V, 1)
+                    .Jmp(epilog)
+
+                    .MarkLabel(returnFalse)
+                    .Movli(R.V, 0)
+
+                    .MarkLabel(epilog)
                     //epilog
                     .Pop_(R.Ra)
                     .Addi(R.Sp, R.Sp, 3)
@@ -396,7 +540,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private static void create_BLIT_BLOCK(ref CodeBuilder builder, Labels labels)
         {
-            var forLoopStart1 = builder.CreateLabel();            
+            var forLoopStart1 = builder.CreateLabel();
             var forLoopEnd1 = builder.CreateLabel();
             var forLoopStart2 = builder.CreateLabel();
             var forLoopContinue2 = builder.CreateLabel();
@@ -445,30 +589,30 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Movli(R.T0, 0)
                     .Mov_(R.T1, row)
                     .MarkLabel(forLoopStart1)
-                    // {
-                    .Bge(R.T0, R.T1, forLoopEnd1)
-                    
-                    // var maskedLine = _screenMemory[i + BOARD_VERTICAL_SHIFT] & COPY_LINE_MASK;
-                    .Addi(R.T3, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)                        
-                    .Ldrx(R.T4, G__VIDEO_START, R.T3)
-                    .Ld(R.T5, __COPY_LINE_MASK)
-                    .And(R.T4, R.T4, R.T5)
+                        // {
+                        .Bge(R.T0, R.T1, forLoopEnd1)
 
-                    // _screenMemory[i + BOARD_VERTICAL_SHIFT] = maskedLine | (_board[i] << BOARD_HORIZONTAL_SHIFT);
-                    .Ldr(mem, R.T0, (short)__BOARD)
-                    .Shli(R.AsmRes, mem, CONSTVAL_BOARD_HORIZONTAL_SHIFT)
-                    .Or(R.T4, R.T4, R.AsmRes)
-                    .Strx(R.T4, G__VIDEO_START, R.T3)
-                    
-                    .Inc_(R.T0)
-                    .Jmp(forLoopStart1)
+                        // var maskedLine = _screenMemory[i + BOARD_VERTICAL_SHIFT] & COPY_LINE_MASK;
+                        .Addi(R.T3, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
+                        .Ldrx(R.T4, G__VIDEO_START, R.T3)
+                        .Ld(R.T5, __COPY_LINE_MASK)
+                        .And(R.T4, R.T4, R.T5)
+
+                        // _screenMemory[i + BOARD_VERTICAL_SHIFT] = maskedLine | (_board[i] << BOARD_HORIZONTAL_SHIFT);
+                        .Ldr(mem, R.T0, (short)__BOARD)
+                        .Shli(R.AsmRes, mem, CONSTVAL_BOARD_HORIZONTAL_SHIFT)
+                        .Or(R.T4, R.T4, R.AsmRes)
+                        .Strx(R.T4, G__VIDEO_START, R.T3)
+
+                        .Inc_(R.T0)
+                        .Jmp(forLoopStart1)
                     .MarkLabel(forLoopEnd1)
                     // }
 
 
                     .Addi(R.T1, row, 4)
                     // for (i = row; i < row + 4; i++, mask >>= 4, offset -= 4)
-                    // i (T0) should still have correct value after prev loop
+                    .Mov_(R.T0, row)
                     .MarkLabel(forLoopStart2)
                         // {                      
                         .Bge(R.T0, R.T1, forLoopEnd2)
@@ -490,16 +634,16 @@ namespace ArturBiniek.Tbx32.Simulator
                         // if (shft >= 0) {
                         .Brlz(shft, elseBranch)
 
-                        // strip >>= shft;
-                        .Shr(strip, strip, shft)
-                        .Jmp(endIf)
+                            // strip >>= shft;
+                            .Shr(strip, strip, shft)
+                            .Jmp(endIf)
 
                         // } else {
                         .MarkLabel(elseBranch)
 
-                        // strip <<= (-shft);
-                        .Neg(R.AsmRes, shft)
-                        .Shl(strip, strip, R.AsmRes)
+                            // strip <<= (-shft);
+                            .Neg(R.AsmRes, shft)
+                            .Shl(strip, strip, R.AsmRes)
 
                         // } 
                         .MarkLabel(endIf)
@@ -508,7 +652,7 @@ namespace ArturBiniek.Tbx32.Simulator
                         .Or(mem, mem, strip)
 
                         // var maskedLine = _screenMemory[i + BOARD_VERTICAL_SHIFT] & COPY_LINE_MASK;
-                        .Addi(R.T3, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)                        
+                        .Addi(R.T3, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
                         .Ldrx(R.T4, G__VIDEO_START, R.T3)
                         .Ld(R.T5, __COPY_LINE_MASK)
                         .And(R.T4, R.T4, R.T5)
@@ -531,23 +675,23 @@ namespace ArturBiniek.Tbx32.Simulator
                     // i (T0) should still have correct value after prev loop
                     .Movli(R.T1, CONSTVAL_BOARD_HEIGHT)
                     .MarkLabel(forLoopStart3)
-                    // {
-                    .Bge(R.T0, R.T1, forLoopEnd3)
+                        // {
+                        .Bge(R.T0, R.T1, forLoopEnd3)
 
-                    // var maskedLine = _screenMemory[i + BOARD_VERTICAL_SHIFT] & COPY_LINE_MASK;
-                    .Addi(R.T3, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
-                    .Ldrx(R.T4, G__VIDEO_START, R.T3)
-                    .Ld(R.T5, __COPY_LINE_MASK)
-                    .And(R.T4, R.T4, R.T5)
+                        // var maskedLine = _screenMemory[i + BOARD_VERTICAL_SHIFT] & COPY_LINE_MASK;
+                        .Addi(R.T3, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
+                        .Ldrx(R.T4, G__VIDEO_START, R.T3)
+                        .Ld(R.T5, __COPY_LINE_MASK)
+                        .And(R.T4, R.T4, R.T5)
 
-                    // _screenMemory[i + BOARD_VERTICAL_SHIFT] = maskedLine | (_board[i] << BOARD_HORIZONTAL_SHIFT);
-                    .Ldr(mem, R.T0, (short)__BOARD)
-                    .Shli(R.AsmRes, mem, CONSTVAL_BOARD_HORIZONTAL_SHIFT)
-                    .Or(R.T4, R.T4, R.AsmRes)
-                    .Strx(R.T4, G__VIDEO_START, R.T3)
+                        // _screenMemory[i + BOARD_VERTICAL_SHIFT] = maskedLine | (_board[i] << BOARD_HORIZONTAL_SHIFT);
+                        .Ldr(mem, R.T0, (short)__BOARD)
+                        .Shli(R.AsmRes, mem, CONSTVAL_BOARD_HORIZONTAL_SHIFT)
+                        .Or(R.T4, R.T4, R.AsmRes)
+                        .Strx(R.T4, G__VIDEO_START, R.T3)
 
-                    .Inc_(R.T0)
-                    .Jmp(forLoopStart3)
+                        .Inc_(R.T0)
+                        .Jmp(forLoopStart3)
                     .MarkLabel(forLoopEnd3)
 
                     //epilog
