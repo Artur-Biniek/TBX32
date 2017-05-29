@@ -185,40 +185,36 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Mov_(R.Fp, R.Sp)
                     .Push_(R.Ra)
 
-                    //code
-                    .Movli(R.T0, 0)
-                    .Movli(R.T1, 32)
-                    .Movi_(R.T7, 0xFFFFFFFF)
+                    // const int zero = 0
+                    .Movli(R.T14, 0)
 
+                    // const int walls = 0x00200400
+                    .Movi_(R.T13, 0x00200400)
+
+                    // const int floor = 0x003FFC00
+                    .Movi_(R.T12 , 0x003FFC00)
+
+                    // for (int i = 0; i < BOARD_HEIGHT; i += 1)
+                    .Movli(R.T0, 0)
+                    .Movli(R.T1, CONSTVAL_BOARD_HEIGHT)
                     .MarkLabel(loop1_start)
-                        .Bge(R.T0, R.T1, loop1_end)
+                    .Bge(R.T0, R.T1, loop1_end)
+                    // {
+                         // _board[i] = zero;
+                        .Str(R.T14, R.T0, (short)__BOARD)
 
-                        .Add(R.T2, G__VIDEO_START, R.T0)
-                        .Str(R.T7, R.T2)
+                        // _screenMemory[i + BOARD_VERTICAL_SHIFT] = 0x00200400;
+                        .Addi(R.T2, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
+                        .Strx(R.T13, G__VIDEO_START, R.T2)                        
 
-                        .Inc_(R.T0)
-                        .Jmp(loop1_start)
+                    .Inc_(R.T0)
+                    .Jmp(loop1_start)
                     .MarkLabel(loop1_end)
+                    // }
 
-                    .Movli(R.T0, 0)
-                    .Movli(R.T1, 20)
-                    .Movi_(R.T7, 0)
-
-                    .MarkLabel(loop2_start)
-                        .Bge(R.T0, R.T1, loop2_end)
-
-                        .Str(R.T7, R.T0, (short)__BOARD)
-
-                        .Inc_(R.T0)
-                        .Jmp(loop2_start)
-                    .MarkLabel(loop2_end)
-
-                    .Movi_(R.T0, CONSTVAL_FULL_LINE_MASK)
-                    .Movi_(R.T1, 0x2FF)
-                    .St(R.T0, __BOARD + 19)
-                    .St(R.T0, __BOARD + 18)
-                    .St(R.T1, __BOARD + 17)
-                    .St(R.T0, __BOARD + 16)
+                    // _screenMemory[i + BOARD_VERTICAL_SHIFT] = 0x003FFC00;
+                    .Addi(R.T2, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
+                    .Strx(R.T12, G__VIDEO_START, R.T2)
 
                     //epilog
                     .Pop_(R.Ra)
