@@ -22,6 +22,8 @@ namespace ArturBiniek.Tbx32.Simulator
         DispatcherTimer _dispatcherTimer = new DispatcherTimer();
 
         Rectangle[,] _pixels = new Rectangle[32, 32];
+        KeyCodes _gamePad;
+
 
         Computer _comp;
         private DateTime LastTime;
@@ -32,6 +34,8 @@ namespace ArturBiniek.Tbx32.Simulator
 
             initializeScreen();
 
+            initilizeKeyboard();
+
             reset();
 
             _dispatcherTimer.Interval = TimeSpan.FromMilliseconds(30); // TODO: this get's rounded to 30fps... need to fix it.
@@ -39,13 +43,61 @@ namespace ArturBiniek.Tbx32.Simulator
             _dispatcherTimer.Tick += _dispatcherTimer_Tick;
         }
 
+        private void initilizeKeyboard()
+        {
+            this.KeyDown += (o, e) =>
+            {
+                switch (e.Key)
+                {
+                    case System.Windows.Input.Key.A:
+                        _gamePad |= KeyCodes.KEY_LEFT;
+                        break;
+                    case System.Windows.Input.Key.D:
+                        _gamePad |= KeyCodes.KEY_RIGHT;
+                        break;
+                    case System.Windows.Input.Key.W:
+                        _gamePad |= KeyCodes.KEY_UP;
+                        break;
+                    case System.Windows.Input.Key.S:
+                        _gamePad |= KeyCodes.KEY_DOWN;
+                        break;
+                    case System.Windows.Input.Key.Escape:
+                        _gamePad |= KeyCodes.KEY_ESC;
+                        break;
+                }
+            };
+
+            this.KeyUp += (o, e) =>
+            {
+                switch (e.Key)
+                {
+                    case System.Windows.Input.Key.A:
+                        _gamePad &= ~KeyCodes.KEY_LEFT;
+                        break;
+                    case System.Windows.Input.Key.D:
+                        _gamePad &= ~KeyCodes.KEY_RIGHT;
+                        break;
+                    case System.Windows.Input.Key.W:
+                        _gamePad &= ~KeyCodes.KEY_UP;
+                        break;
+                    case System.Windows.Input.Key.S:
+                        _gamePad &= ~KeyCodes.KEY_DOWN;
+                        break;
+                    case System.Windows.Input.Key.Escape:
+                        _gamePad &= ~KeyCodes.KEY_ESC;
+                        break;
+                }
+            };
+        }
+
+
         private void reset()
         {
             var prg = ProgramsRepository.Tetris;
 
             _dispatcherTimer.IsEnabled = false;
 
-            _comp = new Computer();
+            _comp = new Computer(() => _gamePad);
             _comp.LoadProgram(prg);
 
             screenRefresh();

@@ -22,10 +22,11 @@ namespace ArturBiniek.Tbx32.Simulator
 
         uint _PC;
         uint _IR;
-      
+
         Memory _ram = new Memory();
         Registers _regs = new Registers();
         Random _rnd = new Random();
+        private Func<KeyCodes> _keyboardController;
 
         public uint PC
         {
@@ -53,8 +54,12 @@ namespace ArturBiniek.Tbx32.Simulator
             }
         }
 
-        public Computer()
+        public Computer() : this(null) { }
+
+        public Computer(Func<KeyCodes> keyboardController)
         {
+            _keyboardController = keyboardController;
+
             Reset();
         }
 
@@ -84,6 +89,11 @@ namespace ArturBiniek.Tbx32.Simulator
         {
             _IR = (uint)_ram[_PC];
             _PC++;
+
+            if (_keyboardController != null)
+            {
+                _ram[GAME_PAD] = (int)_keyboardController();
+            }
 
             var ticks = (ulong)_ram[TICKS_LOW] + ((ulong)_ram[TICKS_HIGH] << 32);
 

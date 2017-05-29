@@ -45,6 +45,7 @@ namespace ArturBiniek.Tbx32.Simulator
         public const Register G__CURRENT_ROW = R.G4;
         public const Register G__CURRENT_COL = R.G3;
 
+        public const Register G__LAST_KEYBOARD = R.G2;
         public const Register G__LAST_UPDATE_TIME = R.G1;
         public const Register G__VIDEO_START = R.G0;
 
@@ -56,6 +57,10 @@ namespace ArturBiniek.Tbx32.Simulator
 
         public const uint CONSTVAL_FULL_LINE_MASK = 0x03FF;
         public const uint CONSTVAL_COPY_LINE_MASK = ~(CONSTVAL_FULL_LINE_MASK << CONSTVAL_BOARD_HORIZONTAL_SHIFT);
+
+        public const short CONSTVAL_REPEAT_RATE_SLOW = 200;
+        public const short CONSTVAL_REPEAT_RATE_FAST = 100;
+        public const short CONSTVAL_REPEAT_RATE_RAPID = 40;
 
         public static IReadOnlyDictionary<uint, uint> Create()
         {
@@ -752,7 +757,35 @@ namespace ArturBiniek.Tbx32.Simulator
             var ifUpdateTimeCanMoveElse = builder.CreateLabel();
             var ifUpdateTimeCanMoveEnd = builder.CreateLabel();
 
+            var escapeCheckEnd = builder.CreateLabel();
+
+            var ifLeftOuterEnd = builder.CreateLabel();
+            var ifLeftOldKeyElseIf = builder.CreateLabel();
+            var ifLeftOldKeyEnd = builder.CreateLabel();
+
+            var ifRightOuterEnd = builder.CreateLabel();
+            var ifRightOldKeyElseIf = builder.CreateLabel();
+            var ifRightOldKeyEnd = builder.CreateLabel();
+
+            var ifDownOuterEnd = builder.CreateLabel();
+            var ifDownOldKeyElseIf = builder.CreateLabel();
+            var ifDownOldKeyEnd = builder.CreateLabel();
+
+            var ifRotateOuterEnd = builder.CreateLabel();
+            var ifRotateOldKeyElseIf = builder.CreateLabel();
+            var ifRotateOldKeyEnd = builder.CreateLabel();
+
             var time = R.S0;
+            var keystate = R.S1;
+            var oldstate = R.S2;
+
+            var moveleft = R.T14;
+            var moveright = R.T13;
+            var movedown = R.T12;
+            var moverotate = R.T11;
+            var ncol = R.T10;
+            var nrow = R.T9;
+            var nrot = R.T8;
 
             builder.
                 MarkLabel(labels.GameLoopProc)
@@ -763,6 +796,19 @@ namespace ArturBiniek.Tbx32.Simulator
 
                 .MarkLabel(gameLoopStart)
 
+                // var keystate = _getKeys();
+                .Ld(keystate, Computer.GAME_PAD)
+                //.Movli(keystate, (short)KeyCodes.KEY_LEFT)
+
+                // if ((keystate & KEY_ESC) != 0)
+                .Andi(R.T0, keystate, (short)KeyCodes.KEY_ESC)
+                .Brz(R.T0, escapeCheckEnd)
+                // {
+                .Push_(R.Fp)
+                .Jal(R.Ra, labels.InitGameProc)
+                // }
+                .MarkLabel(escapeCheckEnd)
+
                 // if (!_playing) continue;
                 .Ld(R.T0, __PLAYING)
                 .Brz(R.T0, gameLoopStart)
@@ -770,11 +816,166 @@ namespace ArturBiniek.Tbx32.Simulator
                 // var time = _getTime();
                 .Ld(time, Computer.TICKS_LOW)
 
+                // bool moveLeft = false
+                .Movli(moveleft, 0)
+
+                // bool moveright = false
+                .Movli(moveright, 0)
+
+                // bool movedown = false
+                .Movli(movedown, 0)
+
+                // bool moverotate = false
+                .Movli(moverotate, 0)
+
+                // int ncol = _curCol
+                .Mov_(ncol, G__CURRENT_COL)
+
+                // int nrow = _curRow
+                .Mov_(nrow, G__CURRENT_ROW)
+
+                // int nrot = _curRotation
+                .Mov_(nrot, G__CURRENT_ROTATION)
+
+                // *** MOVE LEFT HANDLING ***
+                // if ((keystate & KEY_LEFT) != 0)
+                .Andi(R.T0, keystate, (short)KeyCodes.KEY_LEFT)
+                .Brz(R.T0, ifLeftOuterEnd)
+                // {
+                    //  if ((_oldKeys & KEY_LEFT) == 0)
+                    .Andi(R.T0, oldstate, (short)KeyCodes.KEY_LEFT)
+                    .Brnz(R.T0, ifLeftOldKeyElseIf)
+                    // {
+                        //  moveLeft = true;
+                        .Movli(moveleft, 1)
+
+                        //  _lastKeyboardTime = time + REPEAT_RATE_SLOW;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_SLOW)
+
+                    .Jmp(ifLeftOldKeyEnd)
+                    .MarkLabel(ifLeftOldKeyElseIf)
+                    // } else if (time > _lastKeyboardTime) {
+                    .Ble(time, G__LAST_KEYBOARD, ifLeftOldKeyEnd)
+                        // _lastKeyboardTime = time + REPEAT_RATE_FAST;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_FAST)
+
+                        //  moveLeft = true;
+                        .Movli(moveleft, 1)
+
+                    .MarkLabel(ifLeftOldKeyEnd)
+                    // }                    
+                .MarkLabel(ifLeftOuterEnd)
+                // }
+
+                // *** MOVE RIGHT HANDLING ***
+                // if ((keystate & KEY_RIGHT) != 0)
+                .Andi(R.T0, keystate, (short)KeyCodes.KEY_RIGHT)
+                .Brz(R.T0, ifRightOuterEnd)
+                    // {
+                    //  if ((_oldKeys & KEY_RIGHT) == 0)
+                    .Andi(R.T0, oldstate, (short)KeyCodes.KEY_RIGHT)
+                    .Brnz(R.T0, ifRightOldKeyElseIf)
+                        // {
+                        //  moveright = true;
+                        .Movli(moveright, 1)
+
+                        //  _lastKeyboardTime = time + REPEAT_RATE_SLOW;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_SLOW)
+
+                    .Jmp(ifRightOldKeyEnd)
+                    .MarkLabel(ifRightOldKeyElseIf)
+                    // } else if (time > _lastKeyboardTime) {
+                    .Ble(time, G__LAST_KEYBOARD, ifRightOldKeyEnd)
+                        // _lastKeyboardTime = time + REPEAT_RATE_FAST;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_FAST)
+
+                        //  moveright = true;
+                        .Movli(moveright, 1)
+
+                    .MarkLabel(ifRightOldKeyEnd)
+                // }                    
+                .MarkLabel(ifRightOuterEnd)
+                // }
 
 
+                // *** MOVE DOWN HANDLING ***
+                // if ((keystate & KEY_DOWN) != 0)
+                .Andi(R.T0, keystate, (short)KeyCodes.KEY_DOWN)
+                .Brz(R.T0, ifDownOuterEnd)
+                    // {
+                    //  if ((_oldKeys & KEY_DOWN) == 0)
+                    .Andi(R.T0, oldstate, (short)KeyCodes.KEY_DOWN)
+                    .Brnz(R.T0, ifDownOldKeyElseIf)
+                        // {
+                        //  movedown = true;
+                        .Movli(movedown, 1)
+
+                        //  _lastKeyboardTime = time + REPEAT_RATE_SLOW;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_SLOW)
+
+                    .Jmp(ifDownOldKeyEnd)
+                    .MarkLabel(ifDownOldKeyElseIf)
+                    // } else if (time > _lastKeyboardTime) {
+                    .Ble(time, G__LAST_KEYBOARD, ifDownOldKeyEnd)
+                        // _lastKeyboardTime = time + REPEAT_RATE_RAPID;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_RAPID)
+
+                        //  movedown = true;
+                        .Movli(movedown, 1)
+
+                    .MarkLabel(ifDownOldKeyEnd)
+                // }                    
+                .MarkLabel(ifDownOuterEnd)
+                // }
+
+                // *** MOVE ROTATE HANDLING ***
+                // if ((keystate & KEY_ROTATE) != 0)
+                .Andi(R.T0, keystate, (short)KeyCodes.KEY_UP)
+                .Brz(R.T0, ifRotateOuterEnd)
+                    // {
+                    //  if ((_oldKeys & KEY_ROTATE) == 0)
+                    .Andi(R.T0, oldstate, (short)KeyCodes.KEY_UP)
+                    .Brnz(R.T0, ifRotateOldKeyElseIf)
+                        // {
+                        //  moverotate = true;
+                        .Movli(moverotate, 1)
+
+                        //  _lastKeyboardTime = time + REPEAT_RATE_SLOW;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_SLOW)
+
+                    .Jmp(ifRotateOldKeyEnd)
+                    .MarkLabel(ifRotateOldKeyElseIf)
+                    // } else if (time > _lastKeyboardTime) {
+                    .Ble(time, G__LAST_KEYBOARD, ifRotateOldKeyEnd)
+                        // _lastKeyboardTime = time + REPEAT_RATE_RAPID;
+                        .Addi(G__LAST_KEYBOARD, time, CONSTVAL_REPEAT_RATE_RAPID)
+
+                        //  moverotate = true;
+                        .Movli(moverotate, 1)
+
+                    .MarkLabel(ifRotateOldKeyEnd)
+                // }                    
+                .MarkLabel(ifRotateOuterEnd)
+                // }
+
+                .Muli(R.T0, moveleft, -1)
+                .Add(ncol, ncol, R.T0)
+                .Mov_(G__CURRENT_COL, ncol)
+
+                .Muli(R.T0, moveright, 1)
+                .Add(ncol, ncol, R.T0)
+                .Mov_(G__CURRENT_COL, ncol)
+
+                 .Muli(R.T0, movedown, 1)
+                .Add(nrow, nrow, R.T0)
+                .Mov_(G__CURRENT_ROW, nrow)
+
+                .Muli(R.T0, moverotate, 1)
+                .Add(nrot, nrot, R.T0)
+                .Modi(G__CURRENT_ROTATION, nrot, 4)
 
                 // TODO: rest
-
+                .Mov_(oldstate, keystate)
 
 
 
