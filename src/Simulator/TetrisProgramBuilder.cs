@@ -14,6 +14,8 @@ namespace ArturBiniek.Tbx32.Simulator
             public CodeBuilder.Label CanMoveBlockProc { get; private set; }
             public CodeBuilder.Label MergeBlockProc { get; private set; }
             public CodeBuilder.Label BlitBlockProc { get; private set; }
+            public CodeBuilder.Label GameLoopProc { get; private set; }
+            public CodeBuilder.Label CheckLinesProc { get; private set; }
 
             public Labels(CodeBuilder builder)
             {
@@ -23,6 +25,8 @@ namespace ArturBiniek.Tbx32.Simulator
                 CanMoveBlockProc = builder.CreateLabel();
                 MergeBlockProc = builder.CreateLabel();
                 BlitBlockProc = builder.CreateLabel();
+                GameLoopProc = builder.CreateLabel();
+                CheckLinesProc = builder.CreateLabel();
             }
         }
 
@@ -34,12 +38,14 @@ namespace ArturBiniek.Tbx32.Simulator
         public const uint __PLAYING = __NEXT_ROTATION + 1;
         public const uint __FULL_LINE_MASK = __PLAYING + 1;
         public const uint __COPY_LINE_MASK = __FULL_LINE_MASK + 1;
+        public const uint __CURRENT_DELAY = __COPY_LINE_MASK + 1;
 
         public const Register G__CURRENT_BLOCK = R.G6;
         public const Register G__CURRENT_ROTATION = R.G5;
         public const Register G__CURRENT_ROW = R.G4;
         public const Register G__CURRENT_COL = R.G3;
 
+        public const Register G__LAST_UPDATE_TIME = R.G1;
         public const Register G__VIDEO_START = R.G0;
 
         public const short CONSTVAL_BOARD_HEIGHT = 20;
@@ -57,13 +63,10 @@ namespace ArturBiniek.Tbx32.Simulator
             var procedureLabels = new Labels(builder);
 
             var programEntry = builder.CreateLabel();
-            var gameLoopStart = builder.CreateLabel();
-            var gameLoopEnd = builder.CreateLabel();
-            var gameOver = builder.CreateLabel();
 
             var prg = builder
 
-                .Jmp(programEntry)
+                .Jmp(procedureLabels.GameLoopProc)
 
                 // int[20] Board ;
                 .SetOrg(__BOARD)
@@ -111,59 +114,19 @@ namespace ArturBiniek.Tbx32.Simulator
                 .SetOrg(__COPY_LINE_MASK)
                 .Data(CONSTVAL_COPY_LINE_MASK)
 
-
-                .MarkLabel(programEntry)
-                    .Movi_(G__VIDEO_START, Computer.VIDEO_START)
-                    .Push_(R.Fp)
-                    .Jal(R.Ra, procedureLabels.InitGameProc)
-
-
-                .MarkLabel(gameLoopStart)
-
-                    .Push_(R.Fp)
-                    .Push_(G__CURRENT_ROTATION)
-                    .Push_(G__CURRENT_COL)
-                    .Push_(G__CURRENT_ROW)
-                    .Jal(R.Ra, procedureLabels.BlitBlockProc)
-
-                    .Inc_(G__CURRENT_ROW)
-
-                    .Push_(R.Fp)
-                    .Push_(G__CURRENT_ROTATION)
-                    .Push_(G__CURRENT_ROW)
-                    .Push_(G__CURRENT_COL)
-                    .Jal(R.Ra, procedureLabels.CanMoveBlockProc)
-
-                    .Brnz(R.V, gameLoopEnd)                    
-
-                    .Dec_(G__CURRENT_ROW)
-                    .Push_(R.Fp)
-                    .Jal(R.Ra, procedureLabels.MergeBlockProc)
-
-                    .Push_(R.Fp)
-                    .Jal(R.Ra, procedureLabels.GenerateTetrominoProc)
-
-                    .Ld(R.T0, __PLAYING)
-                    .Brz(R.T0, gameOver)
-
-                .MarkLabel(gameLoopEnd)
-                    .Jmp(gameLoopStart)
-
-                .MarkLabel(gameOver)
-                    .Push_(R.Fp)
-                    .Push_(G__CURRENT_ROTATION)
-                    .Push_(G__CURRENT_COL)
-                    .Push_(G__CURRENT_ROW)
-                    .Jal(R.Ra, procedureLabels.BlitBlockProc)
-
-                    .Hlt();
-
+                // int _curDelay = 1000;
+                .SetOrg(__CURRENT_DELAY)
+                .Data(1000)
+                ;
+                
             create_INIT_GAME(ref prg, procedureLabels);
             create_CREATE_BOARD(ref prg, procedureLabels);
             create_GENERATE_TETROMINO(ref prg, procedureLabels);
             create_CAN_MOVE_BLOCK(ref prg, procedureLabels);
             create_MERGE_BLOCK(ref prg, procedureLabels);
             create_BLIT_BLOCK(ref prg, procedureLabels);
+            create_CHECK_LINES(ref prg, procedureLabels);
+            create_GAME_LOOP(ref prg, procedureLabels);
 
             return prg.Build();
         }
@@ -249,6 +212,13 @@ namespace ArturBiniek.Tbx32.Simulator
                         .Inc_(R.T0)
                         .Jmp(loop2_start)
                     .MarkLabel(loop2_end)
+
+                    .Movi_(R.T0, CONSTVAL_FULL_LINE_MASK)
+                    .Movi_(R.T1, 0x2FF)
+                    .St(R.T0, __BOARD + 19)
+                    .St(R.T0, __BOARD + 18)
+                    .St(R.T1, __BOARD + 17)
+                    .St(R.T0, __BOARD + 16)
 
                     //epilog
                     .Pop_(R.Ra)
@@ -699,6 +669,168 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Addi(R.Sp, R.Sp, 3)
                     .Pop_(R.Fp)
                     .Jmpr(R.Ra);
+        }
+
+        private static void create_CHECK_LINES(ref CodeBuilder builder, Labels labels)
+        {
+            var outterForStart = builder.CreateLabel();
+            var outterForEnd = builder.CreateLabel();
+
+            var ifEnd = builder.CreateLabel();
+
+            var innerForStart = builder.CreateLabel();
+            var innerForEnd = builder.CreateLabel();
+
+            var row = R.T14;
+            var next = R.T13;
+
+            builder.
+                MarkLabel(labels.CheckLinesProc)
+                    //prolog
+                    .Mov_(R.Fp, R.Sp)
+                    .Push_(R.Ra)
+
+                    // uint res = 0;
+                    .Xor(R.V, R.V, R.V)
+
+                    // for (int row = BOARD_HEIGHT - 1; row >= 0; row--)
+                    .Movli(row, CONSTVAL_BOARD_HEIGHT)
+                    .Dec_(row)
+                    .MarkLabel(outterForStart)
+                    .Brlz(row, outterForEnd)
+                        // {
+                        // if ((_board[row] & FULL_LINE_MASK) == FULL_LINE_MASK)
+                        .Ldr(R.T0, row, (short)__BOARD)
+                        .Ld(R.T1, __FULL_LINE_MASK)
+                        .And(R.T0, R.T0, R.T1)
+                        .Bneq(R.T0, R.T1, ifEnd)
+                        // {
+                            //for (int next = row; next > 1; next--)
+                            .Mov_(next, row)
+                            .Movli(R.S0, 1)
+                            .MarkLabel(innerForStart)
+                            .Ble(next, R.S0, innerForEnd)
+                            // {
+                                // _board[next] = (_board[next - 1] & COPY_LINE_MASK);
+                                .Addi(R.T0, next, -1) 
+                                .Ldr(R.T0, R.T0, (short)__BOARD)
+                                .Ld(R.T1, __COPY_LINE_MASK)
+                                .And(R.T1, R.T0, R.T1)
+                                .Str(R.T1, next, (short)__BOARD)
+
+                            .Dec_(next)
+                            .Jmp(innerForStart)
+                            .MarkLabel(innerForEnd)
+                            // }
+                            
+                            //  row++; // recheck current row;   
+                            .Inc_(row)
+
+                            //  res++; // add line to result
+                            .Inc_(R.V)
+                        .MarkLabel(ifEnd)
+                        // }
+                        
+                    .Dec_(row)
+                    .Jmp(outterForStart)
+                    .MarkLabel(outterForEnd)
+                    // }
+
+                    //epilog
+                    .Pop_(R.Ra)
+                    .Pop_(R.Fp)
+                    .Jmpr(R.Ra);
+            ;
+        }
+
+        private static void create_GAME_LOOP(ref CodeBuilder builder, Labels labels)
+        {
+            var gameLoopStart = builder.CreateLabel();
+            var gameLoopEnd = builder.CreateLabel();
+
+            var ifUpdateTimeStart = builder.CreateLabel();          
+            var ifUpdateTimeEnd = builder.CreateLabel();
+
+            var ifUpdateTimeCanMoveElse = builder.CreateLabel();
+            var ifUpdateTimeCanMoveEnd = builder.CreateLabel();
+
+            var time = R.S0;
+
+            builder.
+                MarkLabel(labels.GameLoopProc)
+
+                    .Movi_(G__VIDEO_START, Computer.VIDEO_START)
+                    .Push_(R.Fp)
+                    .Jal(R.Ra, labels.InitGameProc)
+
+                .MarkLabel(gameLoopStart)
+
+                // if (!_playing) continue;
+                .Ld(R.T0, __PLAYING)
+                .Brz(R.T0, gameLoopStart)
+
+                // var time = _getTime();
+                .Ld(time, Computer.TICKS_LOW)
+
+
+
+
+                // TODO: rest
+
+
+
+
+                // if (time > _lastUpdateTime + _curDelay)
+                .Ld(R.T0, __CURRENT_DELAY)
+                .Add(R.T0, G__LAST_UPDATE_TIME, R.T0)
+                .Ble(time, R.T0, ifUpdateTimeEnd)
+                // {
+                    // if (canMoveBlock(_curCol, _curRow + 1, _curRotation))
+                    .Push_(R.Fp)
+                    .Push_(G__CURRENT_ROTATION)
+                    .Addi(R.T0, G__CURRENT_ROW, 1)
+                    .Push_(R.T0)
+                    .Push_(G__CURRENT_COL)
+                    .Jal(R.Ra, labels.CanMoveBlockProc)
+                    .Brz(R.V, ifUpdateTimeCanMoveElse)                                
+                    // {
+                        //  _curRow++;
+                        .Inc_(G__CURRENT_ROW)
+                        .Jmp(ifUpdateTimeCanMoveEnd)
+                    // } else {
+                    .MarkLabel(ifUpdateTimeCanMoveElse)
+                        // mergeBlock();
+                        .Push_(R.Fp)
+                        .Jal(R.Ra, labels.MergeBlockProc)
+
+                        // _sevenSegDisplay[0] += checkLines(); 
+                        .Push_(R.Fp)
+                        .Jal(R.Ra, labels.CheckLinesProc)
+                        .Ld(R.T0, Computer.SEG_DISP)
+                        .Add(R.T0, R.T0, R.V)
+                        .St(R.T0, Computer.SEG_DISP)
+
+                        //generateTetromino();
+                        .Push_(R.Fp)
+                        .Jal(R.Ra, labels.GenerateTetrominoProc)
+
+                    .MarkLabel(ifUpdateTimeCanMoveEnd)
+                    // }
+
+                    // _lastUpdateTime = time;
+                    .Mov_(G__LAST_UPDATE_TIME, time)
+                // }
+                .MarkLabel(ifUpdateTimeEnd)
+
+                // blitBlock(_curRow, _curCol, _curRotation);
+                .Push_(R.Fp)
+                .Push_(G__CURRENT_ROTATION)
+                .Push_(G__CURRENT_COL)
+                .Push_(G__CURRENT_ROW)
+                .Jal(R.Ra, labels.BlitBlockProc)
+
+                .Jmp(gameLoopStart)
+                ;
         }
     }
 }
