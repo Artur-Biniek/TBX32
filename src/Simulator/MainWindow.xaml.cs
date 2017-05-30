@@ -49,16 +49,16 @@ namespace ArturBiniek.Tbx32.Simulator
             {
                 switch (e.Key)
                 {
-                    case System.Windows.Input.Key.A:
+                    case System.Windows.Input.Key.Left:
                         _gamePad |= KeyCodes.KEY_LEFT;
                         break;
-                    case System.Windows.Input.Key.D:
+                    case System.Windows.Input.Key.Right:
                         _gamePad |= KeyCodes.KEY_RIGHT;
                         break;
-                    case System.Windows.Input.Key.W:
+                    case System.Windows.Input.Key.Up:
                         _gamePad |= KeyCodes.KEY_UP;
                         break;
-                    case System.Windows.Input.Key.S:
+                    case System.Windows.Input.Key.Down:
                         _gamePad |= KeyCodes.KEY_DOWN;
                         break;
                     case System.Windows.Input.Key.Escape:
@@ -71,16 +71,16 @@ namespace ArturBiniek.Tbx32.Simulator
             {
                 switch (e.Key)
                 {
-                    case System.Windows.Input.Key.A:
+                    case System.Windows.Input.Key.Left:
                         _gamePad &= ~KeyCodes.KEY_LEFT;
                         break;
-                    case System.Windows.Input.Key.D:
+                    case System.Windows.Input.Key.Right:
                         _gamePad &= ~KeyCodes.KEY_RIGHT;
                         break;
-                    case System.Windows.Input.Key.W:
+                    case System.Windows.Input.Key.Up:
                         _gamePad &= ~KeyCodes.KEY_UP;
                         break;
-                    case System.Windows.Input.Key.S:
+                    case System.Windows.Input.Key.Down:
                         _gamePad &= ~KeyCodes.KEY_DOWN;
                         break;
                     case System.Windows.Input.Key.Escape:
@@ -89,7 +89,6 @@ namespace ArturBiniek.Tbx32.Simulator
                 }
             };
         }
-
 
         private void reset()
         {
@@ -146,7 +145,7 @@ namespace ArturBiniek.Tbx32.Simulator
         private void screenRefresh()
         {
             Title = _comp.PC.ToString();
-            txtAvg.Text = _comp[Computer.SEG_DISP].ToString();
+            txtAvg.Content = _comp[Computer.SEG_DISP].ToString();
 
             for (int row = 0; row < 32; row++)
             {

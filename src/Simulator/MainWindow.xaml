@@ -14,11 +14,11 @@
         <Grid x:Name="grdLedScreen" Background="Black" HorizontalAlignment="Center" VerticalAlignment="Top" />
 
 
-        <StackPanel Orientation="Vertical" Grid.Column="1">
-            <Button x:Name="btnReset" Content="Reset" Click="btnReset_Click" />
-            <Button x:Name="btnStep" Content="Step" Click="btnStep_Click" />
-            <Button x:Name="btnRun" Content="Run" Click="btnRun_Click" />
-            <TextBox x:Name="txtAvg" />
+        <StackPanel Focusable="False" Orientation="Vertical" Grid.Column="1">
+            <Button x:Name="btnReset" Focusable="False" IsTabStop="False" Content="Reset" Click="btnReset_Click" />
+            <Button x:Name="btnStep" Focusable="False" IsTabStop="False" Content="Step" Click="btnStep_Click" />
+            <Button x:Name="btnRun" Focusable="False" IsTabStop="False" Content="Run" Click="btnRun_Click" />
+            <Label x:Name="txtAvg" />
         </StackPanel>
     </Grid>
 </Window>
