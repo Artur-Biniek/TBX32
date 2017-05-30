@@ -123,7 +123,7 @@ namespace ArturBiniek.Tbx32.Simulator
                 .SetOrg(__CURRENT_DELAY)
                 .Data(1000)
                 ;
-                
+
             create_INIT_GAME(ref prg, procedureLabels);
             create_CREATE_BOARD(ref prg, procedureLabels);
             create_GENERATE_TETROMINO(ref prg, procedureLabels);
@@ -197,20 +197,20 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Movi_(R.T13, 0x00200400)
 
                     // const int floor = 0x003FFC00
-                    .Movi_(R.T12 , 0x003FFC00)
+                    .Movi_(R.T12, 0x003FFC00)
 
                     // for (int i = 0; i < BOARD_HEIGHT; i += 1)
                     .Movli(R.T0, 0)
                     .Movli(R.T1, CONSTVAL_BOARD_HEIGHT)
                     .MarkLabel(loop1_start)
                     .Bge(R.T0, R.T1, loop1_end)
-                    // {
-                         // _board[i] = zero;
+                        // {
+                        // _board[i] = zero;
                         .Str(R.T14, R.T0, (short)__BOARD)
 
                         // _screenMemory[i + BOARD_VERTICAL_SHIFT] = 0x00200400;
                         .Addi(R.T2, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
-                        .Strx(R.T13, G__VIDEO_START, R.T2)                        
+                        .Strx(R.T13, G__VIDEO_START, R.T2)
 
                     .Inc_(R.T0)
                     .Jmp(loop1_start)
@@ -288,7 +288,7 @@ namespace ArturBiniek.Tbx32.Simulator
             var returnTrue = builder.CreateLabel();
 
             var epilog = builder.CreateLabel();
-            
+
             var mask = R.T14;
             var block = R.T13;
             var x = R.T12;
@@ -386,13 +386,13 @@ namespace ArturBiniek.Tbx32.Simulator
                         .Inc_(c)
                         .Jmp(innerLoopStart)
                         .MarkLabel(innerLoopEnd)
-                        // }
+                    // }
 
                     .Inc_(r)
                     .Jmp(outerLoopStart)
                     .MarkLabel(outerLoopEnd)
                     // }
-                    
+
                     // return true;
                     .MarkLabel(returnTrue)
                     .Movli(R.V, 1)
@@ -706,15 +706,15 @@ namespace ArturBiniek.Tbx32.Simulator
                         .Ld(R.T1, __FULL_LINE_MASK)
                         .And(R.T0, R.T0, R.T1)
                         .Bneq(R.T0, R.T1, ifEnd)
-                        // {
+                            // {
                             //for (int next = row; next > 1; next--)
                             .Mov_(next, row)
                             .Movli(R.S0, 1)
                             .MarkLabel(innerForStart)
                             .Ble(next, R.S0, innerForEnd)
-                            // {
+                                // {
                                 // _board[next] = (_board[next - 1] & COPY_LINE_MASK);
-                                .Addi(R.T0, next, -1) 
+                                .Addi(R.T0, next, -1)
                                 .Ldr(R.T0, R.T0, (short)__BOARD)
                                 .Ld(R.T1, __COPY_LINE_MASK)
                                 .And(R.T1, R.T0, R.T1)
@@ -724,15 +724,15 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Jmp(innerForStart)
                             .MarkLabel(innerForEnd)
                             // }
-                            
+
                             //  row++; // recheck current row;   
                             .Inc_(row)
 
                             //  res++; // add line to result
                             .Inc_(R.V)
                         .MarkLabel(ifEnd)
-                        // }
-                        
+                    // }
+
                     .Dec_(row)
                     .Jmp(outterForStart)
                     .MarkLabel(outterForEnd)
@@ -751,7 +751,7 @@ namespace ArturBiniek.Tbx32.Simulator
             var gameLoopStart = builder.CreateLabel();
             var gameLoopEnd = builder.CreateLabel();
 
-            var ifUpdateTimeStart = builder.CreateLabel();          
+            var ifUpdateTimeStart = builder.CreateLabel();
             var ifUpdateTimeEnd = builder.CreateLabel();
 
             var ifUpdateTimeCanMoveElse = builder.CreateLabel();
@@ -774,6 +774,9 @@ namespace ArturBiniek.Tbx32.Simulator
             var ifRotateOuterEnd = builder.CreateLabel();
             var ifRotateOldKeyElseIf = builder.CreateLabel();
             var ifRotateOldKeyEnd = builder.CreateLabel();
+
+            var ifMovesEnd = builder.CreateLabel();
+            var ifMovesStart = builder.CreateLabel();
 
             var time = R.S0;
             var keystate = R.S1;
@@ -841,11 +844,11 @@ namespace ArturBiniek.Tbx32.Simulator
                 // if ((keystate & KEY_LEFT) != 0)
                 .Andi(R.T0, keystate, (short)KeyCodes.KEY_LEFT)
                 .Brz(R.T0, ifLeftOuterEnd)
-                // {
+                    // {
                     //  if ((_oldKeys & KEY_LEFT) == 0)
                     .Andi(R.T0, oldstate, (short)KeyCodes.KEY_LEFT)
                     .Brnz(R.T0, ifLeftOldKeyElseIf)
-                    // {
+                        // {
                         //  moveLeft = true;
                         .Movli(moveleft, 1)
 
@@ -863,7 +866,7 @@ namespace ArturBiniek.Tbx32.Simulator
                         .Movli(moveleft, 1)
 
                     .MarkLabel(ifLeftOldKeyEnd)
-                    // }                    
+                // }                    
                 .MarkLabel(ifLeftOuterEnd)
                 // }
 
@@ -958,32 +961,68 @@ namespace ArturBiniek.Tbx32.Simulator
                 .MarkLabel(ifRotateOuterEnd)
                 // }
 
-                .Muli(R.T0, moveleft, -1)
-                .Add(ncol, ncol, R.T0)
-                .Mov_(G__CURRENT_COL, ncol)
-
-                .Muli(R.T0, moveright, 1)
-                .Add(ncol, ncol, R.T0)
-                .Mov_(G__CURRENT_COL, ncol)
-
-                 .Muli(R.T0, movedown, 1)
-                .Add(nrow, nrow, R.T0)
-                .Mov_(G__CURRENT_ROW, nrow)
-
-                .Muli(R.T0, moverotate, 1)
-                .Add(nrot, nrot, R.T0)
-                .Modi(G__CURRENT_ROTATION, nrot, 4)
-
-                // TODO: rest
+                // _oldKeys = keystate;
                 .Mov_(oldstate, keystate)
 
+                // if (moveLeft) { ncol--; }
+                .Muli(R.T0, moveleft, -1)
+                .Add(ncol, ncol, R.T0)
 
+                // if (moveRight) {ncol++;}
+                .Muli(R.T0, moveright, 1)
+                .Add(ncol, ncol, R.T0)
+
+                // if (moveDown) {    nrow++;  }
+                .Muli(R.T0, movedown, 1)
+                .Add(nrow, nrow, R.T0)
+
+                // if (rotate)  {nrot = (_curRotation + 1) % 4;}
+                .Muli(R.T0, moverotate, 1)
+                .Add(nrot, nrot, R.T0)
+                .Modi(nrot, nrot, 4)
+
+                //if (moveLeft || moveRight || rotate || moveDown)
+                .Brnz(moveleft, ifMovesStart)
+                .Brnz(moveright, ifMovesStart)
+                .Brnz(moverotate, ifMovesStart)
+                .Brnz(movedown, ifMovesStart)
+                .Jmp(ifMovesEnd)
+                .MarkLabel(ifMovesStart)
+                // {
+                    // Save T-regs that we need after function call.
+                    .Push_(nrot)
+                    .Push_(nrow)
+                    .Push_(ncol)
+
+                    // if (canMoveBlock(ncol, nrow, nrot))                    
+                    .Push_(R.Fp)
+                    .Push_(nrot)
+                    .Push_(nrow)
+                    .Push_(ncol)
+                    .Jal(R.Ra, labels.CanMoveBlockProc)
+
+                    // Resotre T-regs
+                    .Pop_(ncol)
+                    .Pop_(nrow)
+                    .Pop_(nrot)
+
+                    .Brz(R.V, ifMovesEnd)
+                    // {
+                        // _curCol = ncol;
+                        .Mov_(G__CURRENT_COL, ncol)
+                        // _curRow = nrow;
+                        .Mov_(G__CURRENT_ROW, nrow)
+                        // _curRotation = nrot;
+                        .Mov_(G__CURRENT_ROTATION, nrot)
+                    // }
+                // }
+                .MarkLabel(ifMovesEnd)
 
                 // if (time > _lastUpdateTime + _curDelay)
                 .Ld(R.T0, __CURRENT_DELAY)
                 .Add(R.T0, G__LAST_UPDATE_TIME, R.T0)
                 .Ble(time, R.T0, ifUpdateTimeEnd)
-                // {
+                    // {
                     // if (canMoveBlock(_curCol, _curRow + 1, _curRotation))
                     .Push_(R.Fp)
                     .Push_(G__CURRENT_ROTATION)
@@ -991,8 +1030,8 @@ namespace ArturBiniek.Tbx32.Simulator
                     .Push_(R.T0)
                     .Push_(G__CURRENT_COL)
                     .Jal(R.Ra, labels.CanMoveBlockProc)
-                    .Brz(R.V, ifUpdateTimeCanMoveElse)                                
-                    // {
+                    .Brz(R.V, ifUpdateTimeCanMoveElse)
+                        // {
                         //  _curRow++;
                         .Inc_(G__CURRENT_ROW)
                         .Jmp(ifUpdateTimeCanMoveEnd)
