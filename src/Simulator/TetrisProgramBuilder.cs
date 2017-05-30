@@ -119,9 +119,9 @@ namespace ArturBiniek.Tbx32.Simulator
                 .SetOrg(__COPY_LINE_MASK)
                 .Data(CONSTVAL_COPY_LINE_MASK)
 
-                // int _curDelay = 1000;
+                // int _curDelay = 2500;
                 .SetOrg(__CURRENT_DELAY)
-                .Data(1000)
+                .Data(2500)
                 ;
 
             create_INIT_GAME(ref prg, procedureLabels);

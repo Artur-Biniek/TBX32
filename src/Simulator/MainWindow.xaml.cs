@@ -179,7 +179,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
             LastTime = DateTime.Now;
 
-            for (int i = 0; i < dif.TotalMilliseconds; i++)
+            for (int i = 0; i < 3 *  dif.TotalMilliseconds; i++)
                 _comp.Step();
 
             screenRefresh();
