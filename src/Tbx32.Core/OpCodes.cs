@@ -6,7 +6,7 @@
         
         Brk, 
 
-        // Address format - OPCODE | RA | ADDRESS
+        // Address format - OPCODE(6) | RA(5) | ADDRESS(21)
         Ld,             // Load
         St,             // Store
 
@@ -23,7 +23,7 @@
         Brlz,           // Branch if Less than Zero
         Brlez,          // Branch if Less or Equal Zero
 
-        // Offset format - OPCODE | RA | RB | OFFSET
+        // Offset format - OPCODE(6) | RA(5) | RB(5) | OFFSET(16)
         Ldr,            // Load Register
         Str,            // Store Register
 
@@ -36,7 +36,9 @@
 
         Movli,
         Movhi,
-        Addi,         
+
+        // ALU codes - should follow same order and values in 4 LSBs as those in XtdOpCodes
+        Addi = 0x21,        
         Shli,
         Shri,
         Muli,
@@ -48,6 +50,7 @@
 
         Nop = 0b111110,
 
+        // Offset format - OPCODE(6) | RA(5) | RB(5) | RC(5) | OFFSET(11)
         Xtd = 0b111111      // Extended. Opcode contained in least significant bits
     }
 }
