@@ -124,7 +124,7 @@ namespace Tbx32.Core
 
         public static XtdOpCode ExtractXtdOpCode(uint instruction)
         {
-            return (XtdOpCode)(instruction & 0xF);
+            return (XtdOpCode)(instruction & 0x7FF);
         }
         #endregion
 
