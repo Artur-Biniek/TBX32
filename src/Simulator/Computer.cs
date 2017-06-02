@@ -236,11 +236,11 @@ namespace ArturBiniek.Tbx32.Simulator
                     break;
 
                 case OpCode.Shli:
-                    _regs[ra] = _regs[rb] << offset;
+                    _regs[ra] = _regs[rb] << (ushort)offset;
                     break;
 
                 case OpCode.Shri:
-                    _regs[ra] = (int)((uint)_regs[rb] >> offset);
+                    _regs[ra] = (int)((uint)_regs[rb] >> (ushort)offset);
                     break;
 
                 case OpCode.Muli:
@@ -256,7 +256,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     break;
 
                 case OpCode.Andi:
-                    _regs[ra] = _regs[rb] & offset;
+                    _regs[ra] = _regs[rb] & (ushort)offset;
                     break;
 
                 case OpCode.Ori:
@@ -264,7 +264,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     break;
 
                 case OpCode.Xori:
-                    _regs[ra] = _regs[rb] ^ offset;
+                    _regs[ra] = _regs[rb] ^ (ushort)offset;
                     break;
 
                 case OpCode.Nop:
