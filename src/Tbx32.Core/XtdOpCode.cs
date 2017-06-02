@@ -19,7 +19,9 @@
         Not,
         Neg,
 
+        Reserved = 0xF,
+
         Ldrx = 0x10,
-        Strx
+        Strx,        
     }
 }
