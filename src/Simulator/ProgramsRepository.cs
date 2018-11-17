@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Tbx32.Core;
 
 namespace ArturBiniek.Tbx32.Simulator
@@ -272,6 +274,64 @@ namespace ArturBiniek.Tbx32.Simulator
                         .Build();
 
             return prg;
+        }
+
+
+        public static IReadOnlyDictionary<uint, uint> Test0
+        {
+            get { return test0(); }
+        }
+
+        private static IReadOnlyDictionary<uint, uint> test0()
+        {
+            var builder = new CodeBuilder();
+            var d0 = builder.CreateLabel();
+            var d1 = builder.CreateLabel();
+            var d2 = builder.CreateLabel();
+            var d3 = builder.CreateLabel();
+            var d4 = builder.CreateLabel();
+            var d5 = builder.CreateLabel();
+
+            var prg = builder
+                .Ld(Register.R0, d0)
+                .Ld(Register.R1, d1)
+                .Ld(Register.R2, d2)
+                .Ld(Register.R3, d3)
+                .Ld(Register.R4, d4)
+                .Ld(Register.R5, d5)
+                .Hlt()
+                .MarkLabel(d0).Data(1)
+                .MarkLabel(d1).Data(2)
+                .MarkLabel(d2).Data(3)
+                .MarkLabel(d3).Data(4)
+                .MarkLabel(d4).Data(5)
+                .MarkLabel(d5).Data(6)
+
+                ;
+
+            var built = prg.Build();
+            
+            return built;
+        }
+
+        public static string ToString(IReadOnlyDictionary<uint, uint> prg)
+        {
+            var max = prg.Keys.Max();
+            var sb = new StringBuilder();
+
+            for (uint i = 0; i <= max; i++)
+            {
+                if (prg.ContainsKey(i))
+                {
+                    sb.Append(string.Format("{0:X} ", prg[i]));
+                }
+                else
+                {
+                    sb.Append("0 ");
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }

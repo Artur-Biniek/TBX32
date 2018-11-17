@@ -112,7 +112,7 @@ namespace Tbx32.Core
             return (Register)((instruction >> 11) & 0b11111);
         }
 
-        public static short ExtractOffset(uint instruction)
+        public static short ExtractSignedOffset(uint instruction)
         {
             return (short)(instruction & 0xFFFF);
         }

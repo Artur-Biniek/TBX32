@@ -101,7 +101,7 @@ namespace ArturBiniek.Tbx32.Simulator
             var ra = CodeBuilder.ExtractRegA(_IR);
             var rb = CodeBuilder.ExtractRegB(_IR);
             var rc = CodeBuilder.ExtractRegC(_IR);
-            var offset = CodeBuilder.ExtractOffset(_IR);
+            var offset = CodeBuilder.ExtractSignedOffset(_IR);
             var address = CodeBuilder.ExtractAddress(_IR);
 
             switch (opcode)
