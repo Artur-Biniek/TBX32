@@ -295,7 +295,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
             var prg = builder
                 
-                .Ble(Register.R2, Register.R4, d0)
+                .Movhi(Register.R10, 1)
                 .SetOrg(10)
                 .MarkLabel(d0)
             ;
