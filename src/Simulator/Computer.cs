@@ -223,6 +223,10 @@ namespace ArturBiniek.Tbx32.Simulator
                     }
                     break;
 
+                case OpCode.Subi:
+                    _regs[ra] = _regs[rb] - offset;
+                    break;
+
                 case OpCode.Addi:
                     _regs[ra] = _regs[rb] + offset;
                     break;

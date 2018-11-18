@@ -38,7 +38,8 @@
         Movhi,
 
         // ALU codes - should follow same order and values in 4 LSBs as those in XtdOpCodes
-        Addi = 0x21,        
+        Subi = 0x20,
+        Addi,        
         Shli,
         Shri,
         Muli,
