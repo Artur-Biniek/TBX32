@@ -295,23 +295,20 @@ namespace ArturBiniek.Tbx32.Simulator
 
             var prg = builder
                 .MarkLabel(start)
-
-                                   
-                    .Jmp(d1)
-
-                    .MarkLabel(d0)
-
-                    .Jal(Register.R31, start)
+                                  
+                    
+                    .Brlez(Register.R0, d1)
+                    
 
                     .Hlt()
-                
-                //.SetOrg(0x001FFFE0)
 
-                                   
-                    .Data(123).MarkLabel(d1)
-                    .Jal(Register.R1, start)
+                       //.SetOrg(0x001FFFE0)
 
-                    .Data(0).MarkLabel(d2)
+                .SetOrg(10)
+                    .MarkLabel(d1)
+                    .Jmp(start)
+
+                    .Data(1).MarkLabel(d2)
                     .Data(0).MarkLabel(d3)
                     .Data(0).MarkLabel(d4)
                     .Data(0).MarkLabel(d5)
