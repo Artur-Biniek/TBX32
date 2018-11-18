@@ -2854,7 +2854,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
       <a name="contents">addr/data: 8 32
 800094 1400001 80000000 1800000 2870044 100001 3870044 288022
 1f0020 2880 88880 4900008 82b80 82e80 82980 82a80
-82d80 82c80 2848044
+82d80 82c80 2848044 3848044
 </a>
     </comp>
     <comp lib="0" loc="(600,290)" name="Probe">
@@ -2881,7 +2881,7 @@ This file is intended to be loaded by Logisim (http://www.cburch.com/logisim/).
     <comp lib="4" loc="(460,170)" name="ROM">
       <a name="contents">addr/data: 8 8
 3 0 4 6 8 9 a b
-c d e f 10 11 12
+c d e f 10 11 12 13
 </a>
     </comp>
     <comp lib="0" loc="(170,160)" name="Bit Extender">

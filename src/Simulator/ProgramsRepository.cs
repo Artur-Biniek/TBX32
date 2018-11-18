@@ -294,14 +294,9 @@ namespace ArturBiniek.Tbx32.Simulator
             var start = builder.CreateLabel();
 
             var prg = builder
-                .Jmp(start)
-                .SetOrg(10)
-                .MarkLabel(start)
-
-
-                    .Ldr(Register.R1, Register.R2, -5)
-                    
-
+               
+                .Str(Register.R1, Register.R2, -5)
+                
                     .Hlt()
 
 //.SetOrg(0x001FFFE0)
