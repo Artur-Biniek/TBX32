@@ -291,28 +291,31 @@ namespace ArturBiniek.Tbx32.Simulator
             var d3 = builder.CreateLabel();
             var d4 = builder.CreateLabel();
             var d5 = builder.CreateLabel();
+            var start = builder.CreateLabel();
 
             var prg = builder
-                .Ld(Register.R0, d0)
-                .Ld(Register.R1, d1)
-                .Ld(Register.R2, d2)
-                .Ld(Register.R3, d3)
-                .Ld(Register.R4, d4)
-                .Ld(Register.R5, d5)
-                .St(Register.R0, d5)
-                 .St(Register.R1, d4)
-                  .St(Register.R2, d3)
-                   .St(Register.R3, d2)
-                    .St(Register.R4, d1)
-                     .St(Register.R5, d0)
-                .Hlt()
-                .MarkLabel(d0).Data(1)
-                .MarkLabel(d1).Data(2)
-                .MarkLabel(d2).Data(3)
-                .MarkLabel(d3).Data(4)
-                .MarkLabel(d4).Data(5)
-                .MarkLabel(d5).Data(6)
+                .MarkLabel(start)
 
+                                   
+                    .Jmp(d1)
+
+                    .MarkLabel(d0)
+
+                    .Jal(Register.R31, start)
+
+                    .Hlt()
+                
+                //.SetOrg(0x001FFFE0)
+
+                                   
+                    .Data(123).MarkLabel(d1)
+                    .Jal(Register.R1, start)
+
+                    .Data(0).MarkLabel(d2)
+                    .Data(0).MarkLabel(d3)
+                    .Data(0).MarkLabel(d4)
+                    .Data(0).MarkLabel(d5)
+                
                 ;
 
             var built = prg.Build();
