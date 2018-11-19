@@ -38,6 +38,8 @@ namespace ArturBiniek.Tbx32.Simulator
 
             var prg = builder
 
+                .Movi_(R.Sp, 0x001FFEFF)
+
                         .Ld(R.G0, video)
                         .Movli(R.S0, 0)
                         .Movli(R.S1, 31)
@@ -173,6 +175,8 @@ namespace ArturBiniek.Tbx32.Simulator
 
             var prg = builder
 
+                        .Movi_(R.Sp, 0x001FFEFF)
+
                         .Movi_(R.G0, Computer.VIDEO_START)
 
                         .Movli(R.S0, 0)  // x
@@ -188,7 +192,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
 
                             .Movli(R.T0, 0)
-                            .Movli(R.T1, -1)
+                            .Movi_(R.T1, -1)
                             .Bneq(R.S0, R.T0, if1end)
                             .Bneq(R.S2, R.T1, if1end)
                             .Movli(R.S2, 1)
@@ -199,12 +203,12 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Movli(R.T1, 1)
                             .Bneq(R.S0, R.T0, if2end)
                             .Bneq(R.S2, R.T1, if2end)
-                            .Movli(R.S2, -1)
+                            .Movi_(R.S2, -1)
 
                         .MarkLabel(if2end)
 
                             .Movli(R.T0, 0)
-                            .Movli(R.T1, -1)
+                            .Movi_(R.T1, -1)
                             .Bneq(R.S1, R.T0, if3end)
                             .Bneq(R.S3, R.T1, if3end)
                             .Movli(R.S3, 1)
@@ -215,7 +219,7 @@ namespace ArturBiniek.Tbx32.Simulator
                             .Movli(R.T1, 1)
                             .Bneq(R.S1, R.T0, if4end)
                             .Bneq(R.S3, R.T1, if4end)
-                            .Movli(R.S3, -1)
+                            .Movi_(R.S3, -1)
 
                         .MarkLabel(if4end)
 
@@ -285,40 +289,86 @@ namespace ArturBiniek.Tbx32.Simulator
         private static IReadOnlyDictionary<uint, uint> test0()
         {
             var builder = new CodeBuilder();
-            var d0 = builder.CreateLabel();
-            var d1 = builder.CreateLabel();
-            var d2 = builder.CreateLabel();
-            var d3 = builder.CreateLabel();
-            var d4 = builder.CreateLabel();
-            var d5 = builder.CreateLabel();
-            var start = builder.CreateLabel();
-            var end = builder.CreateLabel();
+
+            var video = builder.CreateLabel();
+            var putPixel = builder.CreateLabel();
+            var whileLoop = builder.CreateLabel();
+            var exitLoop = builder.CreateLabel();
 
             var prg = builder
 
-                .Ld(Register.R0, d0)
-                .Movli(Register.R1, 32)
-                .Movli(Register.R2, 32)
-                .Str(Register.R2, Register.R0)
+                .Movi_(R.Sp, 0x001FFEFF)
+                .Push_(R.Fp)
+
+                .Ld(R.G0, video)
+
+                .Jal(R.Ra, putPixel)
+
+                .Addi(R.T1, R.T1, 1)
+                .Jal(R.Ra, putPixel)
+                .Hlt()
 
 
-                .MarkLabel(start)
-                    .Brlez(Register.R1, end)
-                    .Str(Register.R2, Register.R0)
-                    .Subi(Register.R1, Register.R1, 1)
-                    .Addi(Register.R0, Register.R0, 1)
-                .Jmp(start)
+                .MarkLabel(putPixel)
+                            // prolog
+                            .Mov_(R.Fp, R.Sp)
+                            .Push_(R.Ra)
 
-                .MarkLabel(end)
-                    .Hlt()
+                            .Movli(R.T0, 128 + 1)
+                            .Strx(R.T0, R.G0, R.T1)
 
-                .MarkLabel(d0)
-                    .Data(0x001FFFE0)
-            ;
+                            // epilog
+                            .Pop_(R.Ra)
+                            .Addi(R.Sp, R.Sp, 0)
+                            .Pop_(R.Fp)
+                            .Jmpr(R.Ra)
 
-            var built = prg.Build();
-            
-            return built;
+                        .Jmpr(R.Ra)
+
+                        //.Movi_(R.Sp, 0x001FFEFF)
+
+                        //.Ld(R.G0, video)
+                        //.Movli(R.S0, 10)
+                        //.Movli(R.S1, 31)
+
+
+
+                        //    .Push_(R.Fp)
+                        //    .Push_(R.S0)
+                        //    .Push_(R.S0)
+
+                        //    .Jal(R.Ra, putPixel)
+                        //    .Addi(R.S0, R.S0, 1)
+
+                        //    .Hlt()
+
+                        //.MarkLabel(putPixel)
+                        //    // prolog
+                        //    .Mov_(R.Fp, R.Sp)
+                        //    .Push_(R.Ra)
+
+                        //    .Ldr(R.T0, R.Fp, 1)        // T0 <- x
+                        //    .Ldr(R.T1, R.Fp, 2)        // T1 <- y                          
+                        //    .Movli(R.T3, 1)
+                        //    .Movli(R.T4, 31)
+                        //    .Sub(R.T4, R.T4, R.T1)
+                        //    .Shl(R.T4, R.T3, R.T4)
+                        //    .Ldrx(R.T3, R.G0, R.T0)
+                        //    .Or(R.T3, R.T3, R.T4)
+                        //    .Strx(R.T3, R.G0, R.T0)
+
+                        //    // epilog
+                        //    .Pop_(R.Ra)
+                        //    .Addi(R.Sp, R.Sp, 2)
+                        //    .Pop_(R.Fp)
+                        //    .Jmpr(R.Ra)
+
+                        .MarkLabel(video)
+                            .Data((int)Computer.VIDEO_START)
+
+                        .Build();
+
+            return prg;
         }
 
         public static string ToString(IReadOnlyDictionary<uint, uint> prg)
