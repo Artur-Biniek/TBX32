@@ -297,76 +297,25 @@ namespace ArturBiniek.Tbx32.Simulator
 
             var prg = builder
 
-                .Movi_(R.Sp, 0x001FFEFF)
-                .Push_(R.Fp)
-
+            
                 .Ld(R.G0, video)
 
-                .Jal(R.Ra, putPixel)
+                .Movli(R.T0, 1)        // T0 <- x
+                .Movli(R.T1,  2)        // T1 <- y                          
+                .Movli(R.T3, 1)
+                .Movli(R.T4, 31)
+                .Sub(R.T4, R.T4, R.T1)
+                .Shl(R.T4, R.T3, R.T4)
+                .Ldrx(R.T3, R.G0, R.T0)
+                .Or(R.T3, R.T3, R.T4)
+                .Strx(R.T3, R.G0, R.T0)
 
-                .Addi(R.T1, R.T1, 1)
-                .Jal(R.Ra, putPixel)
                 .Hlt()
 
+            .MarkLabel(video)
+                .Data((int)Computer.VIDEO_START)
 
-                .MarkLabel(putPixel)
-                            // prolog
-                            .Mov_(R.Fp, R.Sp)
-                            .Push_(R.Ra)
-
-                            .Movli(R.T0, 128 + 1)
-                            .Strx(R.T0, R.G0, R.T1)
-
-                            // epilog
-                            .Pop_(R.Ra)
-                            .Addi(R.Sp, R.Sp, 0)
-                            .Pop_(R.Fp)
-                            .Jmpr(R.Ra)
-
-                        .Jmpr(R.Ra)
-
-                        //.Movi_(R.Sp, 0x001FFEFF)
-
-                        //.Ld(R.G0, video)
-                        //.Movli(R.S0, 10)
-                        //.Movli(R.S1, 31)
-
-
-
-                        //    .Push_(R.Fp)
-                        //    .Push_(R.S0)
-                        //    .Push_(R.S0)
-
-                        //    .Jal(R.Ra, putPixel)
-                        //    .Addi(R.S0, R.S0, 1)
-
-                        //    .Hlt()
-
-                        //.MarkLabel(putPixel)
-                        //    // prolog
-                        //    .Mov_(R.Fp, R.Sp)
-                        //    .Push_(R.Ra)
-
-                        //    .Ldr(R.T0, R.Fp, 1)        // T0 <- x
-                        //    .Ldr(R.T1, R.Fp, 2)        // T1 <- y                          
-                        //    .Movli(R.T3, 1)
-                        //    .Movli(R.T4, 31)
-                        //    .Sub(R.T4, R.T4, R.T1)
-                        //    .Shl(R.T4, R.T3, R.T4)
-                        //    .Ldrx(R.T3, R.G0, R.T0)
-                        //    .Or(R.T3, R.T3, R.T4)
-                        //    .Strx(R.T3, R.G0, R.T0)
-
-                        //    // epilog
-                        //    .Pop_(R.Ra)
-                        //    .Addi(R.Sp, R.Sp, 2)
-                        //    .Pop_(R.Fp)
-                        //    .Jmpr(R.Ra)
-
-                        .MarkLabel(video)
-                            .Data((int)Computer.VIDEO_START)
-
-                        .Build();
+            .Build();
 
             return prg;
         }
