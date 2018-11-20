@@ -791,7 +791,11 @@ namespace ArturBiniek.Tbx32.Simulator
             var nrot = R.T8;
 
             builder.
+
                 MarkLabel(labels.GameLoopProc)
+
+                    // setup stack bottom
+                    .Movi_(R.Sp, 0x001FFEFF)
 
                     .Movi_(G__VIDEO_START, Computer.VIDEO_START)
                     .Push_(R.Fp)

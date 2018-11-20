@@ -92,7 +92,7 @@ namespace ArturBiniek.Tbx32.Simulator
 
         private void reset()
         {
-            var prg = ProgramsRepository.Test0;
+            var prg = ProgramsRepository.Tetris;
             var text = ProgramsRepository.ToString(prg);
 
             _dispatcherTimer.IsEnabled = false;

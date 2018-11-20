@@ -17,7 +17,7 @@ namespace ArturBiniek.Tbx32.Simulator
         public const uint TICKS_HIGH = 0x001FFFDD;
         public const uint TICKS_LOW = 0x001FFFDC;
 
-        public const uint STACK_BOTTOM = 0x001FFEFF;
+        public const uint RAM_TOP = 0x001FFEFF;
         #endregion
 
         uint _PC;
@@ -68,8 +68,6 @@ namespace ArturBiniek.Tbx32.Simulator
             _PC = 0u;
             _ram.Reset();
             _regs.Reset();
-
-            _regs[R.Sp] = (int)STACK_BOTTOM;
         }
 
         public void LoadProgram(IReadOnlyDictionary<uint, uint> program)
