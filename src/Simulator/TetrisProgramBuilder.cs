@@ -186,7 +186,6 @@ namespace ArturBiniek.Tbx32.Simulator
 
             builder
               .MarkLabel(labels.CreateBoardProc)
-                 
 
                     //prolog
                     .Mov_(R.Fp, R.Sp)
