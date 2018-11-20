@@ -296,19 +296,23 @@ namespace ArturBiniek.Tbx32.Simulator
             var exitLoop = builder.CreateLabel();
 
             var prg = builder
+                    .Movi_(R.G0, Computer.VIDEO_START)
 
+                    .Hlt()
             
-                .Ld(R.G0, video)
+                //.Ld(R.G0, video)
 
-                .Movli(R.T0, 1)        // T0 <- x
-                .Movli(R.T1,  2)        // T1 <- y                          
-                .Movli(R.T3, 1)
-                .Movli(R.T4, 31)
-                .Sub(R.T4, R.T4, R.T1)
-                .Shl(R.T4, R.T3, R.T4)
-                .Ldrx(R.T3, R.G0, R.T0)
-                .Or(R.T3, R.T3, R.T4)
-                .Strx(R.T3, R.G0, R.T0)
+             
+
+                //.Movli(R.T0, 1)        // T0 <- x
+                //.Movli(R.T1,  2)        // T1 <- y                          
+                //.Movli(R.T3, 1)
+                //.Movli(R.T4, 31)
+                //.Sub(R.T4, R.T4, R.T1)
+                //.Shl(R.T4, R.T3, R.T4)
+                //.Ldrx(R.T3, R.G0, R.T0)
+                //.Or(R.T3, R.T3, R.T4)
+                //.Strx(R.T3, R.G0, R.T0)
 
                 .Hlt()
 

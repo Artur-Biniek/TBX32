@@ -186,6 +186,8 @@ namespace ArturBiniek.Tbx32.Simulator
 
             builder
               .MarkLabel(labels.CreateBoardProc)
+                 
+
                     //prolog
                     .Mov_(R.Fp, R.Sp)
                     .Push_(R.Ra)
@@ -217,9 +219,13 @@ namespace ArturBiniek.Tbx32.Simulator
                     .MarkLabel(loop1_end)
                     // }
 
+                  
+
                     // _screenMemory[i + BOARD_VERTICAL_SHIFT] = 0x003FFC00;
                     .Addi(R.T2, R.T0, CONSTVAL_BOARD_VERTICAL_SHIFT)
                     .Strx(R.T12, G__VIDEO_START, R.T2)
+
+                   
 
                     //epilog
                     .Pop_(R.Ra)
@@ -795,9 +801,10 @@ namespace ArturBiniek.Tbx32.Simulator
                 MarkLabel(labels.GameLoopProc)
 
                     // setup stack bottom
-                    .Movi_(R.Sp, 0x001FFEFF)
+                    .Movi_(R.Sp, Computer.RAM_TOP)
 
                     .Movi_(G__VIDEO_START, Computer.VIDEO_START)
+
                     .Push_(R.Fp)
                     .Jal(R.Ra, labels.InitGameProc)
 

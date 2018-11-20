@@ -234,7 +234,7 @@ namespace ArturBiniek.Tbx32.Simulator
                     break;
 
                 case OpCode.Movhi:
-                    _regs[ra] = offset << 16;
+                    _regs[ra] = (ushort)offset << 16;
                     break;
 
                 case OpCode.Shli:
